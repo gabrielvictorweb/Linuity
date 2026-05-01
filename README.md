@@ -69,6 +69,7 @@ chmod +x install.sh
 ## ✅ Validated Linux distributions
 
 - Ubuntu 26.04
+- Debian 13
 
 ---
 
