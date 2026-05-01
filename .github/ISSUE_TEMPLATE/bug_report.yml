@@ -1,0 +1,65 @@
+name: Bug report
+description: Report a problem or unexpected behavior
+title: "[BUG] "
+labels: ["bug"]
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thanks for reporting a bug! Please fill out the details below.
+
+    - type: textarea
+      id: description
+      attributes:
+          label: Description
+          description: What happened?
+          placeholder: Describe the bug clearly
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: Steps to reproduce
+          description: How can we reproduce the issue?
+          placeholder: |
+              1. Run command...
+              2. Do this...
+              3. Error happens
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: Expected behavior
+          description: What should happen?
+          placeholder: Describe the expected result
+      validations:
+          required: true
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: Logs / Output
+          description: Paste any relevant logs or error messages
+          placeholder: Copy and paste terminal output here
+
+    - type: input
+      id: os
+      attributes:
+          label: Operating System
+          placeholder: e.g. Ubuntu 22.04
+
+    - type: input
+      id: python
+      attributes:
+          label: Python version
+          placeholder: e.g. Python 3.11
+
+    - type: input
+      id: version
+      attributes:
+          label: CLI version
+          placeholder: e.g. 0.1.0
