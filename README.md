@@ -1,3 +1,5 @@
+<img width="1003" height="765" alt="image" src="https://github.com/user-attachments/assets/ae065277-1c5c-4fc2-a703-9764451847a1" />
+
 # Linuity
 
 ![Lint](https://github.com/gabrielvictorweb/linuity/actions/workflows/lint.yml/badge.svg)
