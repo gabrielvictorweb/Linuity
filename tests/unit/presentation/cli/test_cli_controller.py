@@ -142,9 +142,7 @@ def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
     monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
     disable_calls = []
-    monkeypatch.setattr(
-        cli_controller.DaemonControl, "disable", lambda: disable_calls.append(True)
-    )
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda: disable_calls.append(True))
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()
