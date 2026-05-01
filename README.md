@@ -95,6 +95,8 @@ chmod +x install.sh
 
 ### 3. During installation
 
+<img width="1007" height="713" alt="Captura de tela de 2026-05-01 12-36-51" src="https://github.com/user-attachments/assets/4e44c373-aa04-4acb-a2c3-dd5ad03e9b00" />
+
 You will be prompted to:
 
 - Select your device using an interactive list (fzf)
@@ -110,7 +112,7 @@ HyperX QuadCast 2 Controller
 
 ### 4. Done
 
-After installation, the daemon will be running automatically.
+<img width="1007" height="782" alt="Captura de tela de 2026-05-01 12-37-53" src="https://github.com/user-attachments/assets/ba987c00-220f-4d2a-99d8-84413db89ef0" />
 
 ---
 
