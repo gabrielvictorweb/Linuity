@@ -68,7 +68,6 @@ chmod +x install.sh
 
 ## ✅ Validated Linux distributions
 
-- Debian 13
 - Ubuntu 26.04
 
 ---
@@ -113,6 +112,8 @@ HyperX QuadCast 2 Controller
 ### 4. Done
 
 <img width="1007" height="782" alt="Captura de tela de 2026-05-01 12-37-53" src="https://github.com/user-attachments/assets/ba987c00-220f-4d2a-99d8-84413db89ef0" />
+
+If `linuity` is not found right after installation, close and open the terminal again to reload your PATH.
 
 ---
 
