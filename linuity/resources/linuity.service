@@ -1,0 +1,17 @@
+[Unit]
+Description=Linuity LED Daemon
+After=multi-user.target systemd-udev-settle.service
+Wants=systemd-udev-settle.service
+
+[Service]
+ExecStart=
+Restart=always
+RestartSec=2
+
+StandardOutput=journal
+StandardError=journal
+
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=multi-user.target
