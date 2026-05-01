@@ -7,6 +7,18 @@ and this project adheres to Semantic Versioning.
 
 ---
 
+## v0.3.0 (2026-05-01)
+
+### Feat
+
+- **effects**: enhance test sequence to restore original configuration after execution
+
+### Fix
+
+- improve safety checks and user feedback in installation script
+- resolve missing global config error on fresh installations
+- update badge links in README.md for coverage and license
+
 ## v0.2.0 (2026-05-01)
 
 ### Feat

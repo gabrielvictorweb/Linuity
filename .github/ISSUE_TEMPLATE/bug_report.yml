@@ -62,4 +62,4 @@ body:
       id: version
       attributes:
           label: CLI version
-          placeholder: e.g. 0.1.0
+          placeholder: e.g. 0.3.0
