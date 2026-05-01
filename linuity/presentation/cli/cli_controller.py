@@ -34,6 +34,7 @@ class CLIController:
         print("✅ Configuração salva com sucesso!\n")
 
     def run_test_sequence(self, times, interval, tests=None):
+        original_config = self.preset_service.load()
         if tests is None:
             tests = [
                 ("blinking", {"interval": 0.01}),
@@ -53,7 +54,7 @@ class CLIController:
                     label += f" (fixo {params['min']}%)"
                 else:
                     label += f" ({params['min']}% → {params['max']}%)"
-            print(f"[ + ] Modo: {label:<25} ⏳")
+            print(f"[ + ] Modo: {label:<25}")
             self.preset_service.save(
                 mode,
                 times,
@@ -67,6 +68,18 @@ class CLIController:
             DaemonControl.restart()
             time.sleep(2)
             print(f"[ ✔ ] Finalizado: {label}\n")
+        if original_config:
+            self.preset_service.save(
+                original_config.get("mode"),
+                original_config.get("times"),
+                original_config.get("interval"),
+                original_config.get("opacity"),
+                original_config.get("min"),
+                original_config.get("max"),
+                original_config.get("vid"),
+                original_config.get("pid"),
+            )
+        DaemonControl.disable()
         print("🏁 Teste concluído!\n")
 
     def save_and_apply(self, mode, times, interval, opacity, min_val, max_val):
