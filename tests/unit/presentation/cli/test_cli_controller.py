@@ -118,3 +118,37 @@ def test_run_test_sequence_fixed_min_max_label(monkeypatch, capsys):
 
     output = capsys.readouterr().out
     assert "fixo 10%" in output
+
+
+def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):
+    class FakePresetService:
+        def __init__(self):
+            self.saved = []
+
+        def load(self):
+            return {
+                "mode": "wave",
+                "times": "3",
+                "interval": "0.4",
+                "opacity": "80",
+                "vid": "1",
+                "pid": "2",
+            }
+
+        def save(self, *args):
+            self.saved.append(args)
+
+    fake_service = FakePresetService()
+    monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
+    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
+    disable_calls = []
+    monkeypatch.setattr(
+        cli_controller.DaemonControl, "disable", lambda: disable_calls.append(True)
+    )
+    monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
+
+    controller = cli_controller.CLIController()
+    controller.run_test_sequence(times=1, interval=0.1, tests=[("blinking", {})])
+
+    assert fake_service.saved[-1][0] == "wave"
+    assert disable_calls == [True]

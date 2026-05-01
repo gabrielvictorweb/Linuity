@@ -68,7 +68,7 @@ class CLIController:
             DaemonControl.restart()
             time.sleep(2)
             print(f"[ ✔ ] Finalizado: {label}\n")
-        if original_config:
+        if original_config and original_config.get("mode"):
             self.preset_service.save(
                 original_config.get("mode"),
                 original_config.get("times"),
