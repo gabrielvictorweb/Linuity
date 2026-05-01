@@ -223,7 +223,7 @@ This automatically:
 ### 3. Push changes and tag
 
 ```bash
-git push --follow-tags
+git push origin [branch] --tags
 ```
 
 This triggers CI and release workflow.
