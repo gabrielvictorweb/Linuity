@@ -5,7 +5,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/gabrielvictorweb/Linuity/badge.svg?branch=main)](https://coveralls.io/github/gabrielvictorweb/Linuity?branch=main)
 ![Python](https://img.shields.io/badge/python-3.10--3.13-blue)
 ![License](https://img.shields.io/github/license/gabrielvictorweb/linuity?branch=main)
-![Code Quality](https://github.com/gabrielvictorweb/linuity/actions/workflows/lint.yml/badge.svg)
 
 **HyperX LED controller for Linux using low-level HID communication.**
 
@@ -42,6 +41,7 @@ chmod +x install.sh
 
 - Control LED modes:
     - `led-off`, `blinking`, `gradual`, `wave`, `bounce`, `flicker`, `scanner`
+    - `test` (runs: `blinking`, `gradual`, `wave`, `bounce`, `flicker`, `scanner`, `led-off`)
 
 - Persistent configuration via preset file
 
@@ -63,6 +63,13 @@ chmod +x install.sh
 - `python3-hid` (system package)
 - `fzf`
 - `udev`
+
+---
+
+## ✅ Validated Linux distributions
+
+- Debian 13
+- Ubuntu 26.04
 
 ---
 
@@ -121,10 +128,34 @@ Run without saving:
 linuity --mode wave
 ```
 
+Scanner effect with custom interval:
+
+```bash
+linuity --mode scanner --interval 0.08 --save
+```
+
+Gradual with min/max range:
+
+```bash
+linuity --mode gradual --min 10 --max 90 --interval 0.2 --save
+```
+
+Wave with max opacity:
+
+```bash
+linuity --mode wave --opacity 80 --interval 0.1 --save
+```
+
 Turn off LED:
 
 ```bash
 linuity --mode led-off --save
+```
+
+Run test sequence (cycles through all effects and disables the daemon at the end):
+
+```bash
+linuity --mode test
 ```
 
 Disable daemon service:
