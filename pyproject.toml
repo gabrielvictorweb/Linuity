@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linuity"
+version = "0.1.0"
+description = "Linux LED control for HyperX Cloud 2"
+authors = [
+    { name = "Gabriel Victor" }
+]
+dependencies = [
+    "hidapi"
+]
+requires-python = ">=3.8"
+
+[project.scripts]
+linuity = "linuity.presentation.cli.main:main"
+linuity-daemon = "linuity.presentation.daemon.main:main"
+
+[tool.setuptools.package-data]
+linuity = ["resources/**/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = [
+    "E",  # erros de estilo
+    "F",  # erros lógicos
+    "I",  # organização de imports (isort)
+    "B",  # boas práticas (bugbear)
+    "UP", # modernizações de código
+]
+
+ignore = [
+    "E501",  # linha longa (opcional)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["linuity"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q --cov=linuity --cov-report=term-missing"
+
+[tool.coverage.run]
+omit = [
+    "linuity/presentation/daemon/*",
+    "linuity/presentation/cli/main.py",
+    "linuity/presentation/cli/components/banner.py",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock"
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+update_changelog_on_bump = true
+version_files = [
+    "pyproject.toml:project.version"
+]
+
+changelog_incremental = true
