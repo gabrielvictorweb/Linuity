@@ -1,0 +1,13 @@
+# arquivos de build
+build/
+*.egg-info/
+
+# cache de ferramentas
+.pytest_cache/
+
+__pycache__/
+*.py[cod]
+*.pyo
+venv
+.ruff_cache
+.coverage
