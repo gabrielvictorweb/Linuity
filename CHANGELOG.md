@@ -7,6 +7,12 @@ and this project adheres to Semantic Versioning.
 
 ---
 
+## v0.3.1 (2026-05-01)
+
+### Fix
+
+- **test**: streamline monkeypatching for daemon control in test_run_test_sequence
+
 ## v0.3.0 (2026-05-01)
 
 ### Feat
