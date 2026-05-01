@@ -2,9 +2,9 @@
 
 ![Lint](https://github.com/gabrielvictorweb/linuity/actions/workflows/lint.yml/badge.svg)
 ![Tests](https://github.com/gabrielvictorweb/linuity/actions/workflows/tests.yml/badge.svg)
-![Coverage](https://coveralls.io/repos/github/gabrielvictorweb/linuity/badge.svg?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/gabrielvictorweb/Linuity/badge.svg?branch=main)](https://coveralls.io/github/gabrielvictorweb/Linuity?branch=main)
 ![Python](https://img.shields.io/badge/python-3.10--3.13-blue)
-![License](https://img.shields.io/github/license/gabrielvictorweb/linuity)
+![License](https://img.shields.io/github/license/gabrielvictorweb/linuity?branch=main)
 ![Code Quality](https://github.com/gabrielvictorweb/linuity/actions/workflows/lint.yml/badge.svg)
 
 **HyperX LED controller for Linux using low-level HID communication.**
