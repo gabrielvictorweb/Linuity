@@ -14,7 +14,7 @@ class ExecFlickerEffect:
         max_val = int(preset.get("max", 100))
         variation = int(preset.get("variation", 10))
 
-        # pequena variação
+        # small variation
         self._top += random.randint(-variation, variation)
         self._bottom += random.randint(-variation, variation)
 

@@ -7,26 +7,26 @@ from linuity.application.ports.support_led_intensity import SupportsLedIntensity
 class ExecScannerEffect:
     def __init__(self, device: SupportsLedIntensity):
         self._device = device
-        self._t = 0.0  # tempo contínuo
+        self._t = 0.0  # continuous time
 
     def execute(self, preset: Dict[str, Any]) -> None:
         speed = float(preset.get("speed", 0.2))
         min_val = int(preset.get("min", 0))
         max_val = int(preset.get("max", 100))
 
-        # 🔥 movimento suave (seno)
+        # smooth motion (sine)
         self._t += speed
-        value = (math.sin(self._t) + 1) / 2  # 0 → 1
+        value = (math.sin(self._t) + 1) / 2  # 0 -> 1
 
-        # posição do "pico"
+        # peak position
         top = value
         bottom = 1 - value
 
-        # 🔥 curva pra criar contraste (rastro)
+        # curve to create contrast (trail)
         top = top**3
         bottom = bottom**3
 
-        # escala pro range
+        # scale to range
         top = int(min_val + top * (max_val - min_val))
         bottom = int(min_val + bottom * (max_val - min_val))
 

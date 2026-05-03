@@ -12,7 +12,7 @@ class ExecBounceEffect:
     def execute(self, preset: Dict[str, Any]) -> None:
         step = int(preset.get("step", 1))
 
-        # atualiza posição
+        # update position
         self._pos += self._direction * step
 
         if self._pos >= 100:
@@ -25,7 +25,7 @@ class ExecBounceEffect:
         top = self._pos
         bottom = 100 - self._pos
 
-        # aplica curva (melhora visual)
+        # apply curve (improves visuals)
         top = int((top / 100) ** 2 * 100)
         bottom = int((bottom / 100) ** 2 * 100)
 
