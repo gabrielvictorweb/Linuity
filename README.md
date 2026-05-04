@@ -1,4 +1,5 @@
-<img width="1003" height="765" alt="image" src="https://github.com/user-attachments/assets/ae065277-1c5c-4fc2-a703-9764451847a1" />
+[![Watch the video](https://github.com/user-attachments/assets/03329484-8408-45a3-a234-1a0f76f68074)](https://www.youtube.com/watch?v=ebCudABsVpM)
+https://www.youtube.com/watch?v=ebCudABsVpM
 
 # Linuity
 
