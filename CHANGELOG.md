@@ -7,6 +7,13 @@ and this project adheres to Semantic Versioning.
 
 ---
 
+## v0.3.2 (2026-06-07)
+
+### Fix
+
+- **daemon**: restore LED effect after device reconnect
+- update license badge URL in README.md
+
 ## v0.3.1 (2026-05-01)
 
 ### Fix

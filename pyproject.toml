@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "linuity"
-version = "0.3.1"
+version = "0.3.2"
 description = "Linux LED control for HyperX Cloud 2"
 authors = [
     { name = "Gabriel Victor" }
@@ -66,11 +66,8 @@ dev = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.3.0"
+version_provider = "pep621"
 tag_format = "v$version"
 update_changelog_on_bump = true
-version_files = [
-    "pyproject.toml:project.version"
-]
 
 changelog_incremental = true
