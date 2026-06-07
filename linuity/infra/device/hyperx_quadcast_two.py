@@ -6,6 +6,11 @@ class HyperXQuadcast2(SupportsLedIntensity):
     def __init__(self, device: UsbDevice):
         self._device = device
 
+    def close(self) -> None:
+        close = getattr(self._device, "close", None)
+        if callable(close):
+            close()
+
     def set_led_intensity(self, top: float, bottom: float) -> None:
         top_val = int(255 * (top / 100))
         bottom_val = int(255 * (bottom / 100))

@@ -91,3 +91,43 @@ def test_create_raises_on_custom_open_error(monkeypatch):
 
     with pytest.raises(RuntimeError):
         factory.create(vid=1, pid=2)
+
+
+def test_is_present_true_when_device_enumerated(monkeypatch):
+    factory_module = _load_factory_module(monkeypatch)
+
+    calls = {}
+
+    def fake_enumerate(vid, pid):
+        calls["args"] = (vid, pid)
+        return [{"path": b"x"}]
+
+    monkeypatch.setattr(factory_module.hid, "enumerate", fake_enumerate, raising=False)
+
+    factory = factory_module.HyperXDeviceFactory()
+
+    assert factory.is_present(vid="111", pid="222") is True
+    assert calls["args"] == (111, 222)
+
+
+def test_is_present_false_when_not_enumerated(monkeypatch):
+    factory_module = _load_factory_module(monkeypatch)
+
+    monkeypatch.setattr(factory_module.hid, "enumerate", lambda vid, pid: [], raising=False)
+
+    factory = factory_module.HyperXDeviceFactory()
+
+    assert factory.is_present() is False
+
+
+def test_is_present_false_on_error(monkeypatch):
+    factory_module = _load_factory_module(monkeypatch)
+
+    def boom(_vid, _pid):
+        raise RuntimeError("hid error")
+
+    monkeypatch.setattr(factory_module.hid, "enumerate", boom, raising=False)
+
+    factory = factory_module.HyperXDeviceFactory()
+
+    assert factory.is_present(vid=1, pid=2) is False

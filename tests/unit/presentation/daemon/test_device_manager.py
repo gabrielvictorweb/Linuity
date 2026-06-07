@@ -45,9 +45,40 @@ def test_connect_handles_exception(mocker):
     assert manager.connect(vid=1, pid=2) is None
 
 
+def test_is_connected_delegates_to_factory(mocker):
+    factory = mocker.Mock()
+    factory.is_present.return_value = True
+    manager = DeviceManager(factory)
+
+    assert manager.is_connected(vid=1, pid=2) is True
+    factory.is_present.assert_called_once_with(vid=1, pid=2)
+
+
 def test_reset_clears_device(mocker):
     manager = DeviceManager(mocker.Mock())
-    manager.device = object()
+    manager.device = mocker.Mock()
+
+    manager.reset()
+
+    assert manager.device is None
+
+
+def test_reset_closes_device(mocker):
+    manager = DeviceManager(mocker.Mock())
+    device = mocker.Mock()
+    manager.device = device
+
+    manager.reset()
+
+    device.close.assert_called_once()
+    assert manager.device is None
+
+
+def test_reset_survives_close_error(mocker):
+    manager = DeviceManager(mocker.Mock())
+    device = mocker.Mock()
+    device.close.side_effect = RuntimeError("boom")
+    manager.device = device
 
     manager.reset()
 

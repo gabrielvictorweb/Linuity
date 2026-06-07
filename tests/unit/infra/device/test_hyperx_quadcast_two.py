@@ -24,3 +24,22 @@ def test_blink_builds_report(mocker):
     quadcast.blink(0, 0)
 
     device.send.assert_called_once()
+
+
+def test_close_delegates_to_device(mocker):
+    device = mocker.Mock()
+    quadcast = HyperXQuadcast2(device)
+
+    quadcast.close()
+
+    device.close.assert_called_once()
+
+
+def test_close_ignored_when_device_has_no_close():
+    class NoClose:
+        def send(self, data):
+            pass
+
+    quadcast = HyperXQuadcast2(NoClose())
+
+    quadcast.close()

@@ -38,6 +38,13 @@ class Daemon:
                 vid = preset.get("vid")
                 pid = preset.get("pid")
 
+                if device is not None and not self.device_manager.is_connected(vid, pid):
+                    print("[ ! ] Device disconnected", flush=True)
+                    self.device_manager.reset()
+                    self.effect_runner.reset()
+                    device = None
+                    self._current_preset = None
+
                 if device is None:
                     device = self.device_manager.connect(vid=vid, pid=pid)
 
@@ -45,6 +52,8 @@ class Daemon:
                         print("[ ! ] Device not detected. Waiting...", flush=True)
                         time.sleep(2)
                         continue
+
+                    self.effect_runner.reset()
 
                 if preset != self._current_preset:
                     print(f"[ ✔ ] New preset loaded: {preset}", flush=True)

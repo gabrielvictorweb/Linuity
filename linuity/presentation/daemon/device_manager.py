@@ -31,6 +31,16 @@ class DeviceManager:
             print(f"[ x ] Failed to connect to device: {e}", flush=True)
             return None
 
+    def is_connected(self, vid=None, pid=None):
+        return self.device_factory.is_present(vid=vid, pid=pid)
+
     def reset(self):
         print("[ ! ] Resetting device connection...", flush=True)
+
+        if self.device is not None:
+            try:
+                self.device.close()
+            except Exception as e:
+                print(f"[ x ] Failed to close device: {e}", flush=True)
+
         self.device = None
