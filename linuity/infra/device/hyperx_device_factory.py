@@ -1,8 +1,19 @@
+import hid
+
 from linuity.infra.device.hid_device import HidDevice
 from linuity.infra.device.hyperx_quadcast_two import HyperXQuadcast2
 
 
 class HyperXDeviceFactory:
+    def is_present(self, vid=None, pid=None):
+        vendor_id = int(vid) if vid is not None else 1008
+        product_id = int(pid) if pid is not None else 2479
+
+        try:
+            return bool(hid.enumerate(vendor_id, product_id))
+        except Exception:
+            return False
+
     def create(self, vid=None, pid=None):
         raw = HidDevice()
 
