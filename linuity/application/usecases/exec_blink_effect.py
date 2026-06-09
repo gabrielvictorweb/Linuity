@@ -9,8 +9,8 @@ class ExecBlinkEffect:
         self._state: bool = False
 
     def execute(self, preset: Dict[str, Any]) -> None:
-        top = float(preset.get("top", 100))
-        bottom = float(preset.get("bottom", 100))
+        top = float(preset.get("max", 100))
+        bottom = float(preset.get("max", 100))
 
         self._state = not self._state
 
