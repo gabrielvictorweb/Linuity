@@ -6,6 +6,6 @@ def test_send_data_to_device_forwards_bytes(mocker):
     usecase = SendDataToDevice(usb)
 
     payload = b"\x01\x02"
-    usecase.executar(payload)
+    usecase.execute(payload)
 
     usb.send.assert_called_once_with(payload)

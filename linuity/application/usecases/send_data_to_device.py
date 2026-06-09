@@ -5,5 +5,5 @@ class SendDataToDevice:
     def __init__(self, usb: UsbCommunicate):
         self._usb = usb
 
-    def executar(self, data: bytes) -> None:
+    def execute(self, data: bytes) -> None:
         self._usb.send(data)
