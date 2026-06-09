@@ -1,19 +1,28 @@
+import logging
 import subprocess
+
+logger = logging.getLogger(__name__)
 
 
 class DaemonControl:
     @staticmethod
     def restart():
-        print("[ + ] Applying configuration to device...")
+        logger.info("Applying configuration to device...")
 
-        subprocess.run(["sudo", "systemctl", "restart", "linuity.service"])
+        subprocess.run(
+            ["sudo", "systemctl", "restart", "linuity.service"],
+            check=True,
+        )
 
-        print("[ ✔ ] Configuration applied successfully")
+        logger.info("Configuration applied successfully")
 
     @staticmethod
     def disable():
-        print("[ + ] Disabling daemon service...")
+        logger.info("Disabling daemon service...")
 
-        subprocess.run(["sudo", "systemctl", "disable", "--now", "linuity.service"])
+        subprocess.run(
+            ["sudo", "systemctl", "disable", "--now", "linuity.service"],
+            check=True,
+        )
 
-        print("[ ✔ ] Daemon service disabled")
+        logger.info("Daemon service disabled")

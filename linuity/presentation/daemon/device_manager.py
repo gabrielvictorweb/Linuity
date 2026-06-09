@@ -1,3 +1,8 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class DeviceManager:
     def __init__(self, device_factory):
         self.device_factory = device_factory
@@ -7,40 +12,40 @@ class DeviceManager:
         if self.device:
             return self.device
 
-        print("[ + ] Connecting to device...", flush=True)
+        logger.info("Connecting to device...")
 
         try:
             vid_int = int(vid) if vid is not None else None
             pid_int = int(pid) if pid is not None else None
         except Exception:
-            print("[ x ] Invalid VID/PID format", flush=True)
+            logger.error("Invalid VID/PID format")
             return None
 
         try:
             device = self.device_factory.create(vid=vid_int, pid=pid_int)
 
             if not device:
-                print("[ ! ] Device not found", flush=True)
+                logger.warning("Device not found")
                 return None
 
             self.device = device
-            print("[ ✔ ] Device connected", flush=True)
+            logger.info("Device connected")
             return self.device
 
         except Exception as e:
-            print(f"[ x ] Failed to connect to device: {e}", flush=True)
+            logger.error("Failed to connect to device: %s", e)
             return None
 
     def is_connected(self, vid=None, pid=None):
         return self.device_factory.is_present(vid=vid, pid=pid)
 
     def reset(self):
-        print("[ ! ] Resetting device connection...", flush=True)
+        logger.warning("Resetting device connection...")
 
         if self.device is not None:
             try:
                 self.device.close()
             except Exception as e:
-                print(f"[ x ] Failed to close device: {e}", flush=True)
+                logger.error("Failed to close device: %s", e)
 
         self.device = None

@@ -62,7 +62,9 @@ def test_hid_device_close(monkeypatch):
     assert device._dev is None
 
 
-def test_hid_device_close_handles_error(monkeypatch, capsys):
+def test_hid_device_close_handles_error(monkeypatch, caplog):
+    import logging
+
     hid_device, fake_inner = _load_hid_device(monkeypatch)
     device = hid_device.HidDevice()
 
@@ -72,7 +74,8 @@ def test_hid_device_close_handles_error(monkeypatch, capsys):
     fake_inner.close = _raise_close
 
     device.open(1, 2)
-    device.close()
+    with caplog.at_level(logging.ERROR):
+        device.close()
 
-    assert "Failed to close device" in capsys.readouterr().out
+    assert "Failed to close device" in caplog.text
     assert device._dev is None
