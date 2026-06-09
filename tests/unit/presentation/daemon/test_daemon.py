@@ -3,6 +3,13 @@ import pytest
 from linuity.presentation.daemon.daemon import Daemon
 
 
+def _make_daemon(mocker, config_loader, device_manager, effect_runner):
+    """Helper that also patches os.path.getmtime so the mtime-cache path works."""
+    config_loader.path = "/fake/preset.conf"
+    mocker.patch("linuity.presentation.daemon.daemon.os.path.getmtime", return_value=1.0)
+    return Daemon(config_loader, device_manager, effect_runner)
+
+
 def test_run_resets_effect_after_connecting_device(mocker):
     preset = {"mode": "bounce", "interval": "0.5", "vid": "1", "pid": "2"}
 
@@ -20,7 +27,7 @@ def test_run_resets_effect_after_connecting_device(mocker):
         side_effect=KeyboardInterrupt,
     )
 
-    daemon = Daemon(config_loader, device_manager, effect_runner)
+    daemon = _make_daemon(mocker, config_loader, device_manager, effect_runner)
 
     with pytest.raises(KeyboardInterrupt):
         daemon.run()
@@ -51,7 +58,7 @@ def test_run_reconnects_when_device_disconnects(mocker):
 
     mocker.patch("linuity.presentation.daemon.daemon.time.sleep", side_effect=fake_sleep)
 
-    daemon = Daemon(config_loader, device_manager, effect_runner)
+    daemon = _make_daemon(mocker, config_loader, device_manager, effect_runner)
 
     with pytest.raises(KeyboardInterrupt):
         daemon.run()
@@ -76,7 +83,7 @@ def test_run_does_not_reset_when_device_not_detected(mocker):
         side_effect=KeyboardInterrupt,
     )
 
-    daemon = Daemon(config_loader, device_manager, effect_runner)
+    daemon = _make_daemon(mocker, config_loader, device_manager, effect_runner)
 
     with pytest.raises(KeyboardInterrupt):
         daemon.run()

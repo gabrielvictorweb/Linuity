@@ -13,7 +13,7 @@ def test_main_rejects_invalid_opacity(monkeypatch, capsys):
         cli_main.main()
 
     assert exc.value.code == 1
-    assert "Opacity must be between 0 and 100" in capsys.readouterr().out
+    assert "Opacity must be between 0 and 100" in capsys.readouterr().out  # print() → stdout
 
 
 def test_main_prints_help_when_no_args(monkeypatch, capsys):

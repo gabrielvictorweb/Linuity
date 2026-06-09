@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
+import logging
+import os
 import time
 from typing import Optional
 
 from linuity.application.effects.effect_runner import EffectRunner
 from linuity.config.config_loader import ConfigLoader
+from linuity.infra.logging_config import log_separator
 from linuity.presentation.daemon.device_manager import DeviceManager
+
+logger = logging.getLogger(__name__)
 
 
 class Daemon:
@@ -20,18 +25,32 @@ class Daemon:
         self.effect_runner = effect_runner
 
         self._current_preset: Optional[dict] = None
+        self._config_mtime: Optional[float] = None
+
+    def _load_preset_if_changed(self) -> Optional[dict]:
+        """Returns updated preset only when the config file has been modified."""
+        try:
+            mtime = os.path.getmtime(self.config_loader.path)
+        except OSError:
+            return None
+
+        if self._current_preset is not None and mtime == self._config_mtime:
+            return self._current_preset
+
+        self._config_mtime = mtime
+        return self.config_loader.load()
 
     def run(self):
         device = None
 
         while True:
             try:
-                print("[ + ] Daemon loop running...", flush=True)
+                logger.debug("Daemon loop running...")
 
-                preset = self.config_loader.load()
+                preset = self._load_preset_if_changed()
 
                 if not preset:
-                    print("[ ! ] No preset found", flush=True)
+                    logger.warning("No preset found")
                     time.sleep(2)
                     continue
 
@@ -39,7 +58,8 @@ class Daemon:
                 pid = preset.get("pid")
 
                 if device is not None and not self.device_manager.is_connected(vid, pid):
-                    print("[ ! ] Device disconnected", flush=True)
+                    log_separator(logger)
+                    logger.warning("Device disconnected")
                     self.device_manager.reset()
                     self.effect_runner.reset()
                     device = None
@@ -49,14 +69,15 @@ class Daemon:
                     device = self.device_manager.connect(vid=vid, pid=pid)
 
                     if device is None:
-                        print("[ ! ] Device not detected. Waiting...", flush=True)
+                        logger.warning("Device not detected. Waiting...")
                         time.sleep(2)
                         continue
 
                     self.effect_runner.reset()
+                    log_separator(logger)
 
                 if preset != self._current_preset:
-                    print(f"[ ✔ ] New preset loaded: {preset}", flush=True)
+                    logger.info("New preset loaded: %s", preset)
                     self._current_preset = preset
 
                 interval = float(preset.get("interval", 0.3))
@@ -66,7 +87,7 @@ class Daemon:
                 time.sleep(interval)
 
             except Exception as e:
-                print(f"[ x ] Daemon error: {e}", flush=True)
+                logger.error("Daemon error: %s", e)
 
                 self.device_manager.reset()
                 device = None
