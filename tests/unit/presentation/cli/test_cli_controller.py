@@ -83,6 +83,7 @@ def test_run_test_sequence_saves_each_preset(monkeypatch):
     fake_service = FakePresetService()
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
     monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda: None)
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()
@@ -107,6 +108,7 @@ def test_run_test_sequence_fixed_min_max_label(monkeypatch, capsys):
     fake_service = FakePresetService()
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
     monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda: None)
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()
@@ -117,7 +119,7 @@ def test_run_test_sequence_fixed_min_max_label(monkeypatch, capsys):
     )
 
     output = capsys.readouterr().out
-    assert "fixo 10%" in output
+    assert "fixed 10%" in output
 
 
 def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):

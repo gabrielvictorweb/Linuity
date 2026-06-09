@@ -43,8 +43,8 @@ chmod +x install.sh
 ## 🚀 Features
 
 - Control LED modes:
-    - `led-off`, `blinking`, `gradual`, `wave`, `bounce`, `flicker`, `scanner`
-    - `test` (runs: `blinking`, `gradual`, `wave`, `bounce`, `flicker`, `scanner`, `led-off`)
+    - `led-off`, `static`, `blinking`, `gradual`, `wave`, `flicker`, `scanner`
+    - `test` (cycles through all effects and disables the daemon at the end)
 
 - Persistent configuration via preset file
 
@@ -129,28 +129,46 @@ Apply an effect and save:
 linuity --mode blinking --save
 ```
 
-Run without saving:
+Run without saving (preview):
 
 ```bash
 linuity --mode wave
 ```
 
-Scanner effect with custom interval:
+Gradual breathing with min/max range:
 
 ```bash
-linuity --mode scanner --interval 0.08 --save
+linuity --mode gradual --min 10 --max 90 --interval 0.02 --save
 ```
 
-Gradual with min/max range:
+Wave with slower step:
 
 ```bash
-linuity --mode gradual --min 10 --max 90 --interval 0.2 --save
+linuity --mode wave --step 5 --interval 0.05 --save
 ```
 
-Wave with max opacity:
+Wave with contrast curve (dramatic peaks, similar to the old `bounce` mode):
 
 ```bash
-linuity --mode wave --opacity 80 --interval 0.1 --save
+linuity --mode wave --contrast --step 1 --interval 0.05 --save
+```
+
+Scanner with custom speed and brightness range:
+
+```bash
+linuity --mode scanner --speed 0.15 --min 5 --max 100 --interval 0.05 --save
+```
+
+Flicker with custom variation:
+
+```bash
+linuity --mode flicker --variation 15 --min 40 --max 100 --interval 0.05 --save
+```
+
+Static brightness:
+
+```bash
+linuity --mode static --opacity 60 --save
 ```
 
 Turn off LED:
@@ -182,6 +200,25 @@ View logs:
 ```bash
 journalctl -u linuity.service -f
 ```
+
+---
+
+## 🎛️ Parameters
+
+| Parameter | Modes | Description | Default |
+| --- | --- | --- | --- |
+| `--mode` | all | Lighting mode | — |
+| `--opacity` | `static`, `blinking` | Brightness 0–100 (shorthand for `--max`) | 100 |
+| `--min` | `gradual`, `flicker`, `scanner` | Minimum brightness (0–100) | 0 |
+| `--max` | `gradual`, `flicker`, `scanner` | Maximum brightness (0–100) | 100 |
+| `--interval` | all animated | Seconds between each effect tick | 0.5 |
+| `--step` | `wave` | Brightness step per tick | 10 |
+| `--contrast` | `wave` | Apply quadratic contrast curve (dramatic peaks) | off |
+| `--speed` | `scanner` | Oscillation speed (radians per tick) | 0.2 |
+| `--variation` | `flicker` | Max random variation per tick | 10 |
+| `--save` | all | Persist configuration and apply immediately | — |
+| `--status` | — | Show current preset | — |
+| `--vid` / `--pid` | — | Override USB device IDs | auto |
 
 ---
 

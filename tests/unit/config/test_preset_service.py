@@ -35,7 +35,7 @@ def test_show_status_when_missing_config(tmp_path, capsys):
     service.show_status()
 
     output = capsys.readouterr().out
-    assert "Nenhum preset configurado" in output
+    assert "No preset configured." in output
 
 
 def test_show_status_prints_config(tmp_path, capsys):
@@ -49,8 +49,8 @@ def test_show_status_prints_config(tmp_path, capsys):
     service.show_status()
 
     output = capsys.readouterr().out
-    assert "Configuração atual" in output
-    assert "Modo: wave" in output
+    assert "Current configuration:" in output
+    assert "Mode: wave" in output
     assert "Min: 10" in output
     assert "Max: 90" in output
     assert "Interval: 0.5" in output
