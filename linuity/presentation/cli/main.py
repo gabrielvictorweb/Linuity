@@ -4,6 +4,7 @@ import argparse
 import logging
 import sys
 from importlib.metadata import version as pkg_version
+from subprocess import CalledProcessError
 
 from linuity.infra.logging_config import setup_cli_logging
 from linuity.infra.system.daemon_control import DaemonControl
@@ -85,29 +86,32 @@ def main():
         controller.show_status()
         return
 
-    if args.mode == "test":
-        logger.info("Running test sequence...")
-        controller.run_test_sequence(args.times, args.interval)
-        return
+    try:
+        if args.mode == "test":
+            controller.run_test_sequence(args.times, args.interval)
+            return
 
-    if args.mode == "off":
-        logger.info("Disabling daemon service...")
-        DaemonControl.disable()
-        return
+        if args.mode == "off":
+            logger.info("Disabling daemon service...")
+            DaemonControl.disable()
+            return
 
-    if not args.mode:
-        logger.error("You must specify a mode")
-        parser.print_help()
+        if not args.mode:
+            logger.error("You must specify a mode")
+            parser.print_help()
+            sys.exit(1)
+
+        if args.save:
+            controller.save_and_apply(
+                args.mode, args.times, args.interval, args.opacity, args.min, args.max,
+                variation=args.variation, speed=args.speed, step=args.step,
+                contrast=args.contrast if args.contrast else None,
+            )
+        else:
+            logger.warning("Use --save to apply changes")
+    except CalledProcessError as e:
+        logger.error("Failed to control the daemon service: %s", e)
         sys.exit(1)
-
-    if args.save:
-        controller.save_and_apply(
-            args.mode, args.times, args.interval, args.opacity, args.min, args.max,
-            variation=args.variation, speed=args.speed, step=args.step,
-            contrast=args.contrast if args.contrast else None,
-        )
-    else:
-        logger.warning("Use --save to apply changes")
 
 
 if __name__ == "__main__":

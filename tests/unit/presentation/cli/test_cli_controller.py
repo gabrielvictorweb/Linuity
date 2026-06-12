@@ -42,7 +42,7 @@ def test_save_and_apply_uses_preset_vid_pid(monkeypatch):
 
     fake_service = FakePresetService()
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
-    restart = monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
+    restart = monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
 
     controller = cli_controller.CLIController()
     controller.save_and_apply("led-off", 1, 0.1, None, None, None)
@@ -77,21 +77,50 @@ def test_run_test_sequence_saves_each_preset(monkeypatch):
         def load(self):
             return {"vid": "1", "pid": "2"}
 
-        def save(self, *args):
-            self.saved.append(args)
+        def save(self, *args, **kwargs):
+            self.saved.append((args, kwargs))
 
     fake_service = FakePresetService()
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
-    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
-    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda **kwargs: None)
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()
     controller.run_test_sequence(times=1, interval=0.1)
 
     assert len(fake_service.saved) == 8
-    assert fake_service.saved[0][0] == "blinking"
-    assert fake_service.saved[-1][0] == "led-off"
+    assert fake_service.saved[0][0][0] == "blinking"
+    assert fake_service.saved[-1][0][0] == "led-off"
+
+
+def test_run_test_sequence_passes_effect_params(monkeypatch):
+    class FakePresetService:
+        def __init__(self):
+            self.saved = []
+
+        def load(self):
+            return {"vid": "1", "pid": "2"}
+
+        def save(self, *args, **kwargs):
+            self.saved.append((args, kwargs))
+
+    fake_service = FakePresetService()
+    monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
+    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda **kwargs: None)
+    monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
+
+    controller = cli_controller.CLIController()
+    controller.run_test_sequence(times=1, interval=0.1)
+
+    saved_by_call = {(args[0], kwargs.get("contrast")): kwargs for args, kwargs in fake_service.saved}
+
+    wave_contrast = saved_by_call[("wave", True)]
+    assert wave_contrast["contrast"] is True
+
+    scanner = saved_by_call[("scanner", None)]
+    assert scanner["speed"] is not None
 
 
 def test_run_test_sequence_fixed_min_max_label(monkeypatch, capsys):
@@ -102,13 +131,13 @@ def test_run_test_sequence_fixed_min_max_label(monkeypatch, capsys):
         def load(self):
             return {"vid": "1", "pid": "2"}
 
-        def save(self, *args):
-            self.saved.append(args)
+        def save(self, *args, **kwargs):
+            self.saved.append((args, kwargs))
 
     fake_service = FakePresetService()
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
-    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
-    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda **kwargs: None)
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()
@@ -120,6 +149,40 @@ def test_run_test_sequence_fixed_min_max_label(monkeypatch, capsys):
 
     output = capsys.readouterr().out
     assert "fixed 10%" in output
+
+
+def test_run_test_sequence_restore_preserves_new_keys(monkeypatch):
+    class FakePresetService:
+        def __init__(self):
+            self.saved = []
+
+        def load(self):
+            return {
+                "mode": "wave",
+                "times": "3",
+                "interval": "0.4",
+                "step": "5",
+                "contrast": "true",
+                "vid": "1",
+                "pid": "2",
+            }
+
+        def save(self, *args, **kwargs):
+            self.saved.append((args, kwargs))
+
+    fake_service = FakePresetService()
+    monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
+    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda **kwargs: None)
+    monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
+
+    controller = cli_controller.CLIController()
+    controller.run_test_sequence(times=1, interval=0.1, tests=[("blinking", {})])
+
+    restore_args, restore_kwargs = fake_service.saved[-1]
+    assert restore_args[0] == "wave"
+    assert restore_kwargs["step"] == "5"
+    assert restore_kwargs["contrast"] == "true"
 
 
 def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):
@@ -137,18 +200,18 @@ def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):
                 "pid": "2",
             }
 
-        def save(self, *args):
-            self.saved.append(args)
+        def save(self, *args, **kwargs):
+            self.saved.append((args, kwargs))
 
     fake_service = FakePresetService()
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
-    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda: None)
+    monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
     disable_calls = []
-    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda: disable_calls.append(True))
+    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda **kwargs: disable_calls.append(True))
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()
     controller.run_test_sequence(times=1, interval=0.1, tests=[("blinking", {})])
 
-    assert fake_service.saved[-1][0] == "wave"
+    assert fake_service.saved[-1][0][0] == "wave"
     assert disable_calls == [True]
