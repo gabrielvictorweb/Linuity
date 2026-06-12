@@ -1,7 +1,6 @@
 from unittest.mock import call
 
 from linuity.application.usecases.exec_blink_effect import ExecBlinkEffect
-from linuity.application.usecases.exec_bounce_effect import ExecBounceEffect
 from linuity.application.usecases.exec_flicker_effect import ExecFlickerEffect
 from linuity.application.usecases.exec_gradual_effect import ExecGradualEffect
 from linuity.application.usecases.exec_off_effect import ExecOffEffect
@@ -14,40 +13,10 @@ def test_exec_blink_effect_toggles(mocker):
     device = mocker.Mock()
     effect = ExecBlinkEffect(device)
 
-    effect.execute({"top": 80, "bottom": 20})
-    effect.execute({"top": 80, "bottom": 20})
+    effect.execute({"max": 80})
+    effect.execute({"max": 80})
 
-    device.set_led_intensity.assert_has_calls([call(80.0, 20.0), call(0, 0)])
-
-
-def test_exec_bounce_effect_applies_curve(mocker):
-    device = mocker.Mock()
-    effect = ExecBounceEffect(device)
-
-    effect.execute({"step": 60})
-
-    device.set_led_intensity.assert_called_once_with(36, 16)
-
-
-def test_exec_bounce_effect_reverses_at_bounds(mocker):
-    device = mocker.Mock()
-    effect = ExecBounceEffect(device)
-
-    effect.execute({"step": 200})
-
-    device.set_led_intensity.assert_called_once_with(100, 0)
-
-
-def test_exec_bounce_effect_reverses_at_lower_bound(mocker):
-    device = mocker.Mock()
-    effect = ExecBounceEffect(device)
-    effect._direction = -1
-    effect._pos = 1
-
-    effect.execute({"step": 5})
-
-    device.set_led_intensity.assert_called_once_with(0, 100)
-    assert effect._direction == 1
+    device.set_led_intensity.assert_has_calls([call(80.0, 80.0), call(0, 0)])
 
 
 def test_exec_flicker_effect_clamps_max(mocker):
@@ -108,9 +77,9 @@ def test_exec_opacity_effect_uses_preset_values(mocker):
     device = mocker.Mock()
     effect = ExecOpacityEffect(device)
 
-    effect.execute({"top": 70, "bottom": 30})
+    effect.execute({"max": 70})
 
-    device.set_led_intensity.assert_called_once_with(70.0, 30.0)
+    device.set_led_intensity.assert_called_once_with(70.0, 70.0)
 
 
 def test_exec_off_effect_sets_zero(mocker):
@@ -131,14 +100,38 @@ def test_exec_scanner_effect_uses_curve(mocker):
     device.set_led_intensity.assert_called_once_with(12, 12)
 
 
-def test_exec_wave_effect_wraps(mocker):
+def test_exec_wave_effect_reaches_full_range(mocker):
     device = mocker.Mock()
     effect = ExecWaveEffect(device)
 
-    for _ in range(10):
+    # step=10: takes 10 calls to reach top=100 (0→10→...→100)
+    for _ in range(11):
         effect.execute({})
 
-    effect.execute({})
+    calls = [c.args for c in device.set_led_intensity.call_args_list]
+    assert calls[0] == (0, 100)  # starts with bottom at full
+    assert calls[10] == (100, 0)  # reaches top at full after 10 steps
+
+
+def test_exec_wave_effect_returns_to_start(mocker):
+    device = mocker.Mock()
+    effect = ExecWaveEffect(device)
+
+    # full ping-pong cycle: 0→100→0 takes 20 calls, 21st is back to (0,100)
+    for _ in range(21):
+        effect.execute({})
 
     last_call = device.set_led_intensity.call_args_list[-1].args
     assert last_call == (0, 100)
+
+
+def test_exec_wave_effect_contrast_applies_curve(mocker):
+    device = mocker.Mock()
+    effect = ExecWaveEffect(device)
+    effect._pct = 60
+
+    effect.execute({"contrast": "true"})
+
+    # without curve: set_led_intensity(60, 40)
+    # with curve: top=(60/100)^2*100=36, bottom=(40/100)^2*100=16
+    device.set_led_intensity.assert_called_once_with(36, 16)

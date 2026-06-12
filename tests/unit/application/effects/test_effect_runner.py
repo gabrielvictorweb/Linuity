@@ -34,12 +34,14 @@ def test_effect_runner_reuses_effect_for_same_mode(mocker):
     assert created[0].modes == ["wave"]
     assert created[0].effect.calls == 2
 
+    # mode change reuses the same factory — no new factory created
     runner.run(device, {"mode": "led-off"})
 
-    assert len(created) == 2
-    assert created[1].modes == ["led-off"]
+    assert len(created) == 1
+    assert created[0].modes == ["wave", "led-off"]
 
+    # reset forces a new factory on next run
     runner.reset()
     runner.run(device, {"mode": "wave"})
 
-    assert len(created) == 3
+    assert len(created) == 2

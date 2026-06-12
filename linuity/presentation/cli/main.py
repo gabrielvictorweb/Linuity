@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
 import sys
 from importlib.metadata import version as pkg_version
+from subprocess import CalledProcessError
 
+from linuity.infra.logging_config import setup_cli_logging
 from linuity.infra.system.daemon_control import DaemonControl
 from linuity.presentation.cli.cli_controller import CLIController
 from linuity.presentation.cli.components import banner
+
+setup_cli_logging()
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -20,10 +27,10 @@ def main():
         choices=[
             "off",
             "led-off",
+            "static",
             "blinking",
             "gradual",
             "wave",
-            "bounce",
             "flicker",
             "scanner",
             "test",
@@ -35,7 +42,10 @@ def main():
     parser.add_argument("--max", type=int, help="Maximum opacity (0-100)")
     parser.add_argument("--times", type=int, default=10)
     parser.add_argument("--interval", type=float, default=0.5)
-    parser.add_argument("--variation", type=int, default=10, help="Effect variation")
+    parser.add_argument("--variation", type=int, default=None, help="Flicker variation (0-100)")
+    parser.add_argument("--speed", type=float, default=None, help="Scanner speed")
+    parser.add_argument("--step", type=int, default=None, help="Wave step size")
+    parser.add_argument("--contrast", action="store_true", help="Apply contrast curve to wave")
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--status", action="store_true")
     parser.add_argument("--config", action="store_true")
@@ -64,9 +74,7 @@ def main():
 
     # save VID/PID config
     if args.pid and args.vid:
-        print("[ + ] Saving device configuration...")
         controller.save_config(args.vid, args.pid)
-        print("[ ✔ ] Configuration saved")
         sys.exit(0)
 
     # no valid args
@@ -78,30 +86,39 @@ def main():
         controller.show_status()
         return
 
-    if args.mode == "test":
-        print("[ + ] Running test sequence...")
-        controller.run_test_sequence(args.times, args.interval)
-        return
+    try:
+        if args.mode == "test":
+            controller.run_test_sequence(args.times, args.interval)
+            return
 
-    if args.mode == "off":
-        print("[ + ] Disabling daemon service...")
-        DaemonControl.disable()
-        print("[ ✔ ] Daemon disabled")
-        return
+        if args.mode == "off":
+            logger.info("Disabling daemon service...")
+            DaemonControl.disable()
+            return
 
-    if not args.mode:
-        print("\n[ x ] You must specify a mode\n")
-        parser.print_help()
+        if not args.mode:
+            logger.error("You must specify a mode")
+            parser.print_help()
+            sys.exit(1)
+
+        if args.save:
+            controller.save_and_apply(
+                args.mode,
+                args.times,
+                args.interval,
+                args.opacity,
+                args.min,
+                args.max,
+                variation=args.variation,
+                speed=args.speed,
+                step=args.step,
+                contrast=args.contrast if args.contrast else None,
+            )
+        else:
+            logger.warning("Use --save to apply changes")
+    except CalledProcessError as e:
+        logger.error("Failed to control the daemon service: %s", e)
         sys.exit(1)
-
-    if args.save:
-        print("[ + ] Applying configuration to device...")
-        controller.save_and_apply(
-            args.mode, args.times, args.interval, args.opacity, args.min, args.max
-        )
-        print("[ ✔ ] Configuration applied\n")
-    else:
-        print("[ ! ] Use --save to apply changes")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,9 @@
+import logging
 import os
 
 CONFIG_PATH = os.path.expanduser("~/.config/linuity/preset.conf")
+
+logger = logging.getLogger(__name__)
 
 
 class PresetService:
@@ -8,7 +11,19 @@ class PresetService:
         self.config_path = config_path
 
     def save(
-        self, mode, times, interval, opacity=None, min_val=None, max_val=None, vid=None, pid=None
+        self,
+        mode,
+        times,
+        interval,
+        opacity=None,
+        min_val=None,
+        max_val=None,
+        vid=None,
+        pid=None,
+        variation=None,
+        speed=None,
+        step=None,
+        contrast=None,
     ):
         os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
         with open(self.config_path, "w") as f:
@@ -26,6 +41,14 @@ class PresetService:
                 f.write(f"vid={vid}\n")
             if pid is not None:
                 f.write(f"pid={pid}\n")
+            if variation is not None:
+                f.write(f"variation={variation}\n")
+            if speed is not None:
+                f.write(f"speed={speed}\n")
+            if step is not None:
+                f.write(f"step={step}\n")
+            if contrast is not None:
+                f.write(f"contrast={str(contrast).lower()}\n")
 
     def load(self):
         if not os.path.exists(self.config_path):
@@ -33,17 +56,20 @@ class PresetService:
         config = {}
         with open(self.config_path) as f:
             for line in f:
-                key, value = line.strip().split("=")
+                line = line.strip()
+                if "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
                 config[key] = value
         return config
 
     def show_status(self):
         config = self.load()
         if not config:
-            print("⚠️ Nenhum preset configurado.")
+            logger.warning("No preset configured.")
             return
-        print("\n📌 Configuração atual:")
-        print(f"Modo: {config.get('mode')}")
+        print("\nCurrent configuration:")
+        print(f"Mode: {config.get('mode')}")
         print(f"Min: {config.get('min')}")
         print(f"Max: {config.get('max')}")
         print(f"Interval: {config.get('interval')}\n")

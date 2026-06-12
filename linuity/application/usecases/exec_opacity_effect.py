@@ -8,7 +8,6 @@ class ExecOpacityEffect:
         self._device = device
 
     def execute(self, preset: Dict[str, Any]) -> None:
-        top = float(preset.get("top", 100))
-        bottom = float(preset.get("bottom", 100))
+        intensity = float(preset.get("max", 100))
 
-        self._device.set_led_intensity(top, bottom)
+        self._device.set_led_intensity(intensity, intensity)

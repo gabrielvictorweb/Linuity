@@ -1,4 +1,5 @@
 import random
+from typing import Any, Dict
 
 from linuity.application.ports.support_led_intensity import SupportsLedIntensity
 
@@ -9,7 +10,7 @@ class ExecFlickerEffect:
         self._top = 50
         self._bottom = 50
 
-    def execute(self, preset):
+    def execute(self, preset: Dict[str, Any]) -> None:
         min_val = int(preset.get("min", 10))
         max_val = int(preset.get("max", 100))
         variation = int(preset.get("variation", 10))

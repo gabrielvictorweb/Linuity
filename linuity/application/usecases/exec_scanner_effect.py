@@ -14,8 +14,8 @@ class ExecScannerEffect:
         min_val = int(preset.get("min", 0))
         max_val = int(preset.get("max", 100))
 
-        # smooth motion (sine)
-        self._t += speed
+        # smooth motion (sine) — keep _t bounded to [0, 2π) to avoid float precision loss
+        self._t = (self._t + speed) % (2 * math.pi)
         value = (math.sin(self._t) + 1) / 2  # 0 -> 1
 
         # peak position
