@@ -67,7 +67,6 @@ class PresetService:
         config = self.load()
         if not config:
             logger.warning("No preset configured.")
-            print("No preset configured.")
             return
         print("\nCurrent configuration:")
         print(f"Mode: {config.get('mode')}")

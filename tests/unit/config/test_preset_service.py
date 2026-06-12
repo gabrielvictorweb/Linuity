@@ -29,13 +29,12 @@ def test_save_and_load_with_min_max_and_vid_pid(tmp_path):
     assert data["pid"] == "456"
 
 
-def test_show_status_when_missing_config(tmp_path, capsys):
+def test_show_status_when_missing_config(tmp_path, caplog):
     service = PresetService(str(tmp_path / "missing.conf"))
 
     service.show_status()
 
-    output = capsys.readouterr().out
-    assert "No preset configured." in output
+    assert "No preset configured." in caplog.text
 
 
 def test_show_status_prints_config(tmp_path, capsys):
