@@ -1,6 +1,6 @@
 import logging
 
-from linuity.infra.logging_config import setup_daemon_logging, setup_cli_logging
+from linuity.infra.logging_config import setup_cli_logging, setup_daemon_logging
 
 
 def test_setup_daemon_logging_adds_handler():
