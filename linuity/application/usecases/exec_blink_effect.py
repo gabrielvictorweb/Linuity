@@ -9,12 +9,11 @@ class ExecBlinkEffect:
         self._state: bool = False
 
     def execute(self, preset: Dict[str, Any]) -> None:
-        top = float(preset.get("max", 100))
-        bottom = float(preset.get("max", 100))
+        intensity = float(preset.get("max", 100))
 
         self._state = not self._state
 
         if self._state:
-            self._device.set_led_intensity(top, bottom)
+            self._device.set_led_intensity(intensity, intensity)
         else:
             self._device.set_led_intensity(0, 0)
