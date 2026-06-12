@@ -114,7 +114,9 @@ def test_run_test_sequence_passes_effect_params(monkeypatch):
     controller = cli_controller.CLIController()
     controller.run_test_sequence(times=1, interval=0.1)
 
-    saved_by_call = {(args[0], kwargs.get("contrast")): kwargs for args, kwargs in fake_service.saved}
+    saved_by_call = {
+        (args[0], kwargs.get("contrast")): kwargs for args, kwargs in fake_service.saved
+    }
 
     wave_contrast = saved_by_call[("wave", True)]
     assert wave_contrast["contrast"] is True
@@ -207,7 +209,9 @@ def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):
     monkeypatch.setattr(cli_controller, "PresetService", lambda: fake_service)
     monkeypatch.setattr(cli_controller.DaemonControl, "restart", lambda **kwargs: None)
     disable_calls = []
-    monkeypatch.setattr(cli_controller.DaemonControl, "disable", lambda **kwargs: disable_calls.append(True))
+    monkeypatch.setattr(
+        cli_controller.DaemonControl, "disable", lambda **kwargs: disable_calls.append(True)
+    )
     monkeypatch.setattr(cli_controller.time, "sleep", lambda _val: None)
 
     controller = cli_controller.CLIController()

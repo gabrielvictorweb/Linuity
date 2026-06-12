@@ -2,10 +2,10 @@ import logging
 import sys
 
 _LEVEL_PREFIX = {
-    logging.DEBUG:    "DBG",
-    logging.INFO:     " + ",
-    logging.WARNING:  " ! ",
-    logging.ERROR:    " x ",
+    logging.DEBUG: "DBG",
+    logging.INFO: " + ",
+    logging.WARNING: " ! ",
+    logging.ERROR: " x ",
     logging.CRITICAL: "!!!",
 }
 

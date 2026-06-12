@@ -109,8 +109,8 @@ def test_exec_wave_effect_reaches_full_range(mocker):
         effect.execute({})
 
     calls = [c.args for c in device.set_led_intensity.call_args_list]
-    assert calls[0] == (0, 100)    # starts with bottom at full
-    assert calls[10] == (100, 0)   # reaches top at full after 10 steps
+    assert calls[0] == (0, 100)  # starts with bottom at full
+    assert calls[10] == (100, 0)  # reaches top at full after 10 steps
 
 
 def test_exec_wave_effect_returns_to_start(mocker):

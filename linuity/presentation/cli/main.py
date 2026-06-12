@@ -103,8 +103,15 @@ def main():
 
         if args.save:
             controller.save_and_apply(
-                args.mode, args.times, args.interval, args.opacity, args.min, args.max,
-                variation=args.variation, speed=args.speed, step=args.step,
+                args.mode,
+                args.times,
+                args.interval,
+                args.opacity,
+                args.min,
+                args.max,
+                variation=args.variation,
+                speed=args.speed,
+                step=args.step,
                 contrast=args.contrast if args.contrast else None,
             )
         else:

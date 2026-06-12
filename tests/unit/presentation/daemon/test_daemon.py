@@ -95,9 +95,7 @@ def test_run_does_not_reset_when_device_not_detected(mocker):
 def test_load_preset_if_changed_does_not_resurrect_stale_preset(mocker):
     config_loader = mocker.Mock()
     config_loader.path = "/fake/preset.conf"
-    getmtime = mocker.patch(
-        "linuity.presentation.daemon.daemon.os.path.getmtime", return_value=1.0
-    )
+    getmtime = mocker.patch("linuity.presentation.daemon.daemon.os.path.getmtime", return_value=1.0)
 
     daemon = Daemon(config_loader, mocker.Mock(), mocker.Mock())
 

@@ -109,15 +109,34 @@ class CLIController:
         log_separator(logger)
 
     def save_and_apply(
-        self, mode, times, interval, opacity, min_val, max_val,
-        variation=None, speed=None, step=None, contrast=None
+        self,
+        mode,
+        times,
+        interval,
+        opacity,
+        min_val,
+        max_val,
+        variation=None,
+        speed=None,
+        step=None,
+        contrast=None,
     ):
         config = self.preset_service.load() or {}
         vid = config.get("vid")
         pid = config.get("pid")
 
         self.preset_service.save(
-            mode, times, interval, opacity, min_val, max_val, vid, pid,
-            variation=variation, speed=speed, step=step, contrast=contrast,
+            mode,
+            times,
+            interval,
+            opacity,
+            min_val,
+            max_val,
+            vid,
+            pid,
+            variation=variation,
+            speed=speed,
+            step=step,
+            contrast=contrast,
         )
         DaemonControl.restart()
