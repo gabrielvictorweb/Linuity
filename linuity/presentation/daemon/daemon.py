@@ -37,8 +37,15 @@ class Daemon:
         if self._current_preset is not None and mtime == self._config_mtime:
             return self._current_preset
 
+        preset = self.config_loader.load()
+        if preset is None:
+            # Invalid/empty file: don't record the mtime, so the next iteration
+            # retries instead of resurrecting the previous preset.
+            self._current_preset = None
+            return None
+
         self._config_mtime = mtime
-        return self.config_loader.load()
+        return preset
 
     def run(self):
         device = None

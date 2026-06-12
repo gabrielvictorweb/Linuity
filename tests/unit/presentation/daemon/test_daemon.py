@@ -90,3 +90,30 @@ def test_run_does_not_reset_when_device_not_detected(mocker):
 
     effect_runner.reset.assert_not_called()
     effect_runner.run.assert_not_called()
+
+
+def test_load_preset_if_changed_does_not_resurrect_stale_preset(mocker):
+    config_loader = mocker.Mock()
+    config_loader.path = "/fake/preset.conf"
+    getmtime = mocker.patch(
+        "linuity.presentation.daemon.daemon.os.path.getmtime", return_value=1.0
+    )
+
+    daemon = Daemon(config_loader, mocker.Mock(), mocker.Mock())
+
+    config_loader.load.return_value = {"mode": "wave"}
+    preset = daemon._load_preset_if_changed()
+    assert preset == {"mode": "wave"}
+    daemon._current_preset = preset  # run() does this after loading
+
+    # file modified with invalid/empty content
+    getmtime.return_value = 2.0
+    config_loader.load.return_value = None
+    assert daemon._load_preset_if_changed() is None
+
+    # subsequent iterations must keep returning None, not the old preset
+    assert daemon._load_preset_if_changed() is None
+
+    # once the file is valid again, the new preset is picked up
+    config_loader.load.return_value = {"mode": "static"}
+    assert daemon._load_preset_if_changed() == {"mode": "static"}
