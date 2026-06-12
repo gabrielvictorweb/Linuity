@@ -42,8 +42,13 @@ def test_save_and_load_new_effect_params(tmp_path):
     service = PresetService(str(path))
 
     service.save(
-        "wave", 1, 0.02,
-        variation=20, speed=0.3, step=5, contrast=True,
+        "wave",
+        1,
+        0.02,
+        variation=20,
+        speed=0.3,
+        step=5,
+        contrast=True,
     )
 
     data = service.load()
