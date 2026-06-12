@@ -7,6 +7,27 @@ and this project adheres to Semantic Versioning.
 
 ---
 
+## v0.4.0 (2026-06-12)
+
+### Feat
+
+- **cli**: forward new effect params and wrap errors in CalledProcessError
+- **logging**: add structured formatter with lifecycle separators
+- **wave**: add --contrast flag, remove bounce mode, add static
+
+### Fix
+
+- **effects**: align blink and opacity to use max key
+- **effects**: correct preset key names and scanner float precision
+
+### Refactor
+
+- **daemon**: prevent stale preset resurrection on invalid config
+- **infra**: add quiet flag to restart and disable
+- **config**: remove duplicate print and switch test to caplog
+- **effects**: lazy factory instantiation and rename execute
+- **infra**: migrate from print statements to logging module
+
 ## v0.3.2 (2026-06-07)
 
 ### Fix
