@@ -1,4 +1,5 @@
 import logging
+import subprocess
 import threading
 from importlib import resources
 from importlib.metadata import PackageNotFoundError
@@ -52,21 +53,44 @@ def _build_app():
             super().__init__(application=app, title="Linuity")
             self.controller = GUIController()
             self.set_default_size(420, -1)
+            self._log_stop = threading.Event()
+            self.connect("destroy", self._stop_log_stream)
 
-            root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-            root.set_margin_top(16)
-            root.set_margin_bottom(16)
-            root.set_margin_start(16)
-            root.set_margin_end(16)
+            root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             self.set_child(root)
 
-            root.append(self._build_header())
-            root.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
+            # header fixed above the stack — visible on all pages
+            header_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+            header_box.set_margin_top(16)
+            header_box.set_margin_start(16)
+            header_box.set_margin_end(16)
+            header_box.append(self._build_header())
+            header_box.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
+            root.append(header_box)
+
+            stack = Gtk.Stack()
+            stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+
+            switcher = Gtk.StackSwitcher()
+            switcher.set_stack(stack)
+            switcher.set_halign(Gtk.Align.CENTER)
+            switcher.set_margin_top(12)
+            switcher.set_margin_bottom(12)
+
+            root.append(switcher)
+            root.append(stack)
+
+            # --- Controls page ---
+            controls = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            controls.set_margin_top(4)
+            controls.set_margin_bottom(16)
+            controls.set_margin_start(16)
+            controls.set_margin_end(16)
+            stack.add_titled(controls, "controls", "Controls")
 
             self._mode_dropdown = Gtk.DropDown.new_from_strings(MODES)
             self._mode_dropdown.connect("notify::selected", self._on_mode_changed)
-            mode_row = self._labeled_row("Mode", self._mode_dropdown)
-            root.append(mode_row)
+            controls.append(self._labeled_row("Mode", self._mode_dropdown))
 
             self._param_rows = {}
             self._param_widgets = {}
@@ -79,32 +103,40 @@ def _build_app():
                     widget.connect("notify::active", self._on_param_changed)
                 else:
                     widget.connect("value-changed", self._on_param_changed)
-                root.append(row)
+                controls.append(row)
 
             buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
             self._apply_btn = Gtk.Button(label="Apply")
             self._apply_btn.add_css_class("suggested-action")
             self._apply_btn.connect("clicked", self._on_apply)
-            off_btn = Gtk.Button(label="Turn Off")
-            off_btn.add_css_class("destructive-action")
-            off_btn.connect("clicked", self._on_turn_off)
+            self._off_btn = Gtk.Button(label="Turn Off")
+            self._off_btn.add_css_class("destructive-action")
+            self._off_btn.connect("clicked", self._on_turn_off)
+            self._spinner = Gtk.Spinner()
+            self._spinner.set_visible(False)
             buttons.append(self._apply_btn)
-            buttons.append(off_btn)
-            root.append(buttons)
+            buttons.append(self._off_btn)
+            buttons.append(self._spinner)
+            controls.append(buttons)
 
             self._status_label = Gtk.Label(label="")
             self._status_label.set_xalign(0)
-            root.append(self._status_label)
+            controls.append(self._status_label)
 
             self._update_label = Gtk.Label(label="")
             self._update_label.set_xalign(0)
             self._update_label.set_visible(False)
-            root.append(self._update_label)
+            controls.append(self._update_label)
+
+            # --- Logs page ---
+            logs = self._build_logs_page()
+            stack.add_titled(logs, "logs", "Logs")
 
             self._preset = {}
             self._load_current_preset()
             self._on_mode_changed(self._mode_dropdown, None)
             self._check_for_update_async()
+            self._start_log_stream()
 
         def _check_for_update_async(self):
             from gi.repository import GLib
@@ -211,6 +243,16 @@ def _build_app():
                 self._apply_btn.set_label("Apply")
                 self._apply_btn.set_sensitive(True)
 
+        def _set_busy(self, busy):
+            self._apply_btn.set_sensitive(not busy)
+            self._off_btn.set_sensitive(not busy)
+            self._spinner.set_visible(busy)
+            if busy:
+                self._spinner.start()
+                self._status_label.set_text("Applying…")
+            else:
+                self._spinner.stop()
+
         def _on_apply(self, _button):
             mode = self._selected_mode()
             values = self._collect_values()
@@ -218,26 +260,49 @@ def _build_app():
                 "min_val" if key == "min" else "max_val" if key == "max" else key: value
                 for key, value in values.items()
             }
+            self._set_busy(True)
+            threading.Thread(target=self._do_apply, args=(mode, kwargs), daemon=True).start()
 
+        def _do_apply(self, mode, kwargs):
+            from gi.repository import GLib
             try:
                 self.controller.apply(mode, **kwargs)
+                GLib.idle_add(self._on_apply_done, mode, None)
             except (ValueError, CalledProcessError) as e:
-                self._show_error(str(e))
-                return
-            self._status_label.set_text(f"Applied: {mode}")
-            self._preset = self.controller.load_preset()
-            self._sync_apply_button()
+                GLib.idle_add(self._on_apply_done, mode, str(e))
+
+        def _on_apply_done(self, mode, error):
+            self._set_busy(False)
+            if error:
+                self._show_error(error)
+            else:
+                self._status_label.set_text(f"Applied: {mode}")
+                self._preset = self.controller.load_preset()
+                self._sync_apply_button()
+            return False
 
         def _on_turn_off(self, _button):
+            self._set_busy(True)
+            threading.Thread(target=self._do_turn_off, daemon=True).start()
+
+        def _do_turn_off(self):
+            from gi.repository import GLib
             try:
                 self.controller.turn_off()
+                GLib.idle_add(self._on_turn_off_done, None)
             except CalledProcessError as e:
-                self._show_error(str(e))
-                return
-            self._status_label.set_text("Daemon disabled")
-            # daemon is off now, so re-applying the same preset is meaningful
-            self._preset = {}
-            self._sync_apply_button()
+                GLib.idle_add(self._on_turn_off_done, str(e))
+
+        def _on_turn_off_done(self, error):
+            self._set_busy(False)
+            if error:
+                self._show_error(error)
+            else:
+                self._status_label.set_text("Daemon disabled")
+                # daemon is off — re-applying the same preset is meaningful
+                self._preset = {}
+                self._sync_apply_button()
+            return False
 
         def _show_error(self, message):
             dialog = Gtk.AlertDialog()
@@ -261,6 +326,62 @@ def _build_app():
             if mode:
                 self._status_label.set_text(f"Current preset: {mode}")
             self._sync_apply_button()
+
+        def _build_logs_page(self):
+            scroll = Gtk.ScrolledWindow()
+            scroll.set_vexpand(True)
+            scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+
+            self._log_view = Gtk.TextView()
+            self._log_view.set_editable(False)
+            self._log_view.set_cursor_visible(False)
+            self._log_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+            self._log_view.add_css_class("monospace")
+            self._log_view.set_margin_top(8)
+            self._log_view.set_margin_bottom(8)
+            self._log_view.set_margin_start(8)
+            self._log_view.set_margin_end(8)
+
+            scroll.set_child(self._log_view)
+            return scroll
+
+        def _start_log_stream(self):
+            try:
+                proc = subprocess.Popen(
+                    [
+                        "journalctl", "-u", "linuity.service",
+                        "-f", "-n", "30", "--no-pager", "--output=short",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                )
+            except FileNotFoundError:
+                return
+            self._log_proc = proc
+            threading.Thread(target=self._log_worker, args=(proc,), daemon=True).start()
+
+        def _log_worker(self, proc):
+            from gi.repository import GLib
+            for line in proc.stdout:
+                if self._log_stop.is_set():
+                    break
+                GLib.idle_add(self._append_log, line.rstrip())
+            proc.stdout.close()
+
+        def _append_log(self, line):
+            buf = self._log_view.get_buffer()
+            buf.insert(buf.get_end_iter(), line + "\n")
+            vadj = self._log_view.get_parent().get_vadjustment()
+            at_bottom = vadj.get_value() >= vadj.get_upper() - vadj.get_page_size() - 1
+            if at_bottom:
+                self._log_view.scroll_to_mark(buf.get_insert(), 0, False, 0, 0)
+            return False
+
+        def _stop_log_stream(self, *_):
+            self._log_stop.set()
+            if hasattr(self, "_log_proc"):
+                self._log_proc.terminate()
 
     class LinuityApp(Gtk.Application):
         def __init__(self):
