@@ -8,6 +8,7 @@ from subprocess import CalledProcessError
 
 from linuity.infra.logging_config import setup_cli_logging
 from linuity.infra.system.daemon_control import DaemonControl
+from linuity.infra.update_checker import check_for_update
 from linuity.presentation.cli.cli_controller import CLIController
 from linuity.presentation.cli.components import banner
 
@@ -19,6 +20,12 @@ logger = logging.getLogger(__name__)
 def main():
 
     banner.show(pkg_version("linuity"))
+
+    update = check_for_update(pkg_version("linuity"))
+    if update:
+        logger.warning(
+            "New version available: v%s — https://github.com/gabrielvictorweb/linuity", update
+        )
 
     parser = argparse.ArgumentParser(description="HyperX LED Controller (Linuity)")
 
