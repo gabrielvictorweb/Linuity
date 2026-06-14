@@ -90,8 +90,8 @@ def test_run_test_sequence_saves_each_preset(monkeypatch):
     controller.run_test_sequence(times=1, interval=0.1)
 
     assert len(fake_service.saved) == 8
-    assert fake_service.saved[0][0][0] == "blinking"
-    assert fake_service.saved[-1][0][0] == "led-off"
+    assert fake_service.saved[0][1]["mode"] == "blinking"
+    assert fake_service.saved[-1][1]["mode"] == "led-off"
 
 
 def test_run_test_sequence_passes_effect_params(monkeypatch):
@@ -115,7 +115,7 @@ def test_run_test_sequence_passes_effect_params(monkeypatch):
     controller.run_test_sequence(times=1, interval=0.1)
 
     saved_by_call = {
-        (args[0], kwargs.get("contrast")): kwargs for args, kwargs in fake_service.saved
+        (kwargs.get("mode"), kwargs.get("contrast")): kwargs for args, kwargs in fake_service.saved
     }
 
     wave_contrast = saved_by_call[("wave", True)]
@@ -182,7 +182,7 @@ def test_run_test_sequence_restore_preserves_new_keys(monkeypatch):
     controller.run_test_sequence(times=1, interval=0.1, tests=[("blinking", {})])
 
     restore_args, restore_kwargs = fake_service.saved[-1]
-    assert restore_args[0] == "wave"
+    assert restore_kwargs["mode"] == "wave"
     assert restore_kwargs["step"] == "5"
     assert restore_kwargs["contrast"] == "true"
 
@@ -217,5 +217,5 @@ def test_run_test_sequence_restores_preset_and_disables_daemon(monkeypatch):
     controller = cli_controller.CLIController()
     controller.run_test_sequence(times=1, interval=0.1, tests=[("blinking", {})])
 
-    assert fake_service.saved[-1][0][0] == "wave"
+    assert fake_service.saved[-1][1]["mode"] == "wave"
     assert disable_calls == [True]
