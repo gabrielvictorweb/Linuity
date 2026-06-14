@@ -225,13 +225,13 @@ echo -e "${CYAN}[ + ] Installing desktop launcher...${RESET}"
 ICONS="$HOME/.local/share/icons/hicolor"
 mkdir -p "$HOME/.local/share/applications"
 
-# limpa colocacoes erradas/antigas (PNG nao pode ficar em scalable; SVG nao e usado)
+# limpa colocacoes erradas/antigas
 rm -f "$ICONS/scalable/apps/linuity.png" "$ICONS/scalable/apps/linuity.svg"
+rm -f "$ICONS/1024x1024/apps/linuity.png"
 
-# PNG raster numa pasta de tamanho fixo, lendo as dimensoes reais do arquivo
-SZ=$(python3 -c "import struct;f=open('linuity/resources/linuity.png','rb');f.read(16);w,h=struct.unpack('>II',f.read(8));print(f'{w}x{h}')")
-mkdir -p "$ICONS/$SZ/apps"
-cp linuity/resources/linuity.png "$ICONS/$SZ/apps/linuity.png"
+# xdg-icon-resource instala no diretorio correto e atualiza o cache
+# hicolor so suporta ate 512x512; instalar em tamanho maior faz o icone sumir
+xdg-icon-resource install --novendor --size 512 linuity/resources/linuity.png linuity
 
 tee "$HOME/.local/share/applications/linuity.desktop" > /dev/null <<EOF
 [Desktop Entry]
@@ -249,7 +249,6 @@ StartupNotify=true
 EOF
 
 update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
-gtk-update-icon-cache -f -t "$ICONS" 2>/dev/null || true
 
 echo -e "${GREEN}[ ✔ ] Launcher installed (search for 'Linuity' in GNOME)${RESET}"
 
