@@ -56,6 +56,10 @@ chmod +x install.sh
 
 - Lightweight and CLI-first design
 
+- Optional GTK interface (`linuity --mode gui`)
+
+- Automatic update check (notifies on startup when a new GitHub release exists)
+
 ---
 
 ## 📦 Requirements
@@ -66,6 +70,7 @@ chmod +x install.sh
 - `python3-hid` (system package)
 - `fzf`
 - `udev`
+- `python3-gi` and `gir1.2-gtk-4.0` (optional, for the GUI)
 
 ---
 
@@ -189,6 +194,23 @@ Disable daemon service:
 linuity --mode off
 ```
 
+Open the graphical interface (GTK):
+
+```bash
+linuity --mode gui
+```
+
+The GUI lets you pick a mode, tweak only the parameters relevant to it, and apply with one click. All dependencies are installed by `install.sh` — no extra setup needed. If you installed manually, install GTK support with `sudo apt install python3-gi gir1.2-gtk-4.0` (or `pip install .[gui]`).
+
+The installer also adds a desktop launcher: search for **Linuity** in GNOME activities to open the GUI directly. Daemon control from the GUI works without a password prompt thanks to a sudoers rule scoped exclusively to `systemctl restart/disable linuity.service` for the `linuity` group (re-login required after install).
+
+### 🔔 Update notifications
+
+Linuity checks GitHub for a newer release on startup. The CLI prints a warning
+with the new version, and the GUI shows a banner with a link to GitHub. The
+result is cached for 24h in `~/.cache/linuity/latest_version`, and any network
+error is silently ignored so the check never breaks the tool.
+
 Check status:
 
 ```bash
@@ -246,6 +268,8 @@ These operations require administrator privileges.
     - `pipx`
     - `python3-hid`
     - `fzf`
+    - `python3-gi`
+    - `gir1.2-gtk-4.0`
 
 - Registers a systemd service:
 
@@ -259,10 +283,17 @@ These operations require administrator privileges.
 /etc/udev/rules.d/
 ```
 
+- Adds a scoped sudoers rule (passwordless daemon control from the GUI):
+
+```
+/etc/sudoers.d/linuity   (NOPASSWD only for systemctl restart/disable linuity.service)
+```
+
 These allow Linuity to:
 
 - Access your USB device without permission issues
 - Restart automatically when the device reconnects
+- Restart/disable the daemon from the GUI without a password prompt
 
 ---
 
@@ -285,6 +316,13 @@ This file stores:
 
 - Selected device (VID/PID)
 - LED configuration
+
+- Installs a GNOME desktop launcher and icon:
+
+```
+~/.local/share/applications/linuity.desktop
+~/.local/share/icons/hicolor/<size>/apps/linuity.png
+```
 
 ---
 
@@ -321,8 +359,10 @@ This ensures:
 pipx uninstall linuity
 sudo systemctl disable linuity.service
 sudo rm /etc/systemd/system/linuity.service
-sudo rm /etc/udev/rules.d/98-linuity-restart.rules
-sudo rm /etc/udev/rules.d/99-hidraw-permissions.rules
+sudo rm /etc/udev/rules.d/99-linuity.rules
+sudo rm /etc/sudoers.d/linuity
+rm ~/.local/share/applications/linuity.desktop
+rm -f ~/.local/share/icons/hicolor/*/apps/linuity.png
 ```
 
 ---
