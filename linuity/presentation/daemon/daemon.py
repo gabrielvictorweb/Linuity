@@ -2,6 +2,8 @@
 
 import logging
 import os
+import signal
+import threading
 import time
 from typing import Optional
 
@@ -49,8 +51,11 @@ class Daemon:
 
     def run(self):
         device = None
+        self._stop = threading.Event()
+        signal.signal(signal.SIGTERM, lambda *_: self._stop.set())
+        signal.signal(signal.SIGINT, lambda *_: self._stop.set())
 
-        while True:
+        while not self._stop.is_set():
             try:
                 logger.debug("Daemon loop running...")
 
@@ -93,8 +98,10 @@ class Daemon:
 
                 time.sleep(interval)
 
+            except (KeyboardInterrupt, SystemExit):
+                raise
             except Exception as e:
-                logger.error("Daemon error: %s", e)
+                logger.exception("Daemon error: %s", e)
 
                 self.device_manager.reset()
                 device = None
