@@ -55,6 +55,7 @@ omit = [
     "linuity/presentation/daemon/*",
     "linuity/presentation/cli/main.py",
     "linuity/presentation/cli/components/banner.py",
+    "linuity/presentation/gui/main.py",
 ]
 
 [project.optional-dependencies]
@@ -62,6 +63,9 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-mock"
+]
+gui = [
+    "PyGObject>=3.42"
 ]
 
 [tool.commitizen]

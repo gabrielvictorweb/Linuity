@@ -41,8 +41,9 @@ def main():
             "flicker",
             "scanner",
             "test",
+            "gui",
         ],
-        help="Lighting mode (use 'off' to disable daemon)",
+        help="Lighting mode (use 'off' to disable daemon, 'gui' to open the interface)",
     )
     parser.add_argument("--opacity", type=int, help="Max opacity (0-100)")
     parser.add_argument("--min", type=int, help="Minimum opacity (0-100)")
@@ -60,6 +61,12 @@ def main():
     parser.add_argument("--vid", type=int, help="Vendor ID")
 
     args = parser.parse_args()
+
+    if args.mode == "gui":
+        from linuity.presentation.gui.main import launch_gui
+
+        sys.exit(launch_gui())
+
     controller = CLIController()
 
     # validations
