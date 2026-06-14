@@ -12,6 +12,22 @@ class CLIController:
     def __init__(self):
         self.preset_service = PresetService()
 
+    def _save_from_dict(self, config: dict) -> None:
+        self.preset_service.save(
+            mode=config.get("mode"),
+            times=config.get("times"),
+            interval=config.get("interval"),
+            opacity=config.get("opacity"),
+            min_val=config.get("min"),
+            max_val=config.get("max"),
+            vid=config.get("vid"),
+            pid=config.get("pid"),
+            variation=config.get("variation"),
+            speed=config.get("speed"),
+            step=config.get("step"),
+            contrast=config.get("contrast"),
+        )
+
     def show_status(self):
         self.preset_service.show_status()
 
@@ -68,20 +84,19 @@ class CLIController:
                 label += " (contrast)"
 
             print(f"  {i}/{total}  {label} ".ljust(44, "."), end=" ", flush=True)
-            self.preset_service.save(
-                mode,
-                times,
-                interval,
-                None,
-                params.get("min"),
-                params.get("max"),
-                vid_pid.get("vid"),
-                vid_pid.get("pid"),
-                variation=params.get("variation"),
-                speed=params.get("speed"),
-                step=params.get("step"),
-                contrast=params.get("contrast"),
-            )
+            self._save_from_dict({
+                "mode": mode,
+                "times": times,
+                "interval": interval,
+                "min": params.get("min"),
+                "max": params.get("max"),
+                "vid": vid_pid.get("vid"),
+                "pid": vid_pid.get("pid"),
+                "variation": params.get("variation"),
+                "speed": params.get("speed"),
+                "step": params.get("step"),
+                "contrast": params.get("contrast"),
+            })
             DaemonControl.restart(quiet=True)
             time.sleep(2)
             print("ok")
@@ -89,20 +104,7 @@ class CLIController:
         print()
 
         if original_config and original_config.get("mode"):
-            self.preset_service.save(
-                original_config.get("mode"),
-                original_config.get("times"),
-                original_config.get("interval"),
-                original_config.get("opacity"),
-                original_config.get("min"),
-                original_config.get("max"),
-                original_config.get("vid"),
-                original_config.get("pid"),
-                variation=original_config.get("variation"),
-                speed=original_config.get("speed"),
-                step=original_config.get("step"),
-                contrast=original_config.get("contrast"),
-            )
+            self._save_from_dict(original_config)
             logger.info("Original preset restored (%s)", original_config.get("mode"))
         DaemonControl.disable(quiet=True)
         logger.info("Test sequence complete")

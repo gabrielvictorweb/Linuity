@@ -6,6 +6,7 @@ import sys
 from importlib.metadata import version as pkg_version
 from subprocess import CalledProcessError
 
+from linuity.application.effects.effect_factory import AVAILABLE_MODES
 from linuity.infra.logging_config import setup_cli_logging
 from linuity.infra.system.daemon_control import DaemonControl
 from linuity.infra.update_checker import check_for_update
@@ -31,18 +32,7 @@ def main():
 
     parser.add_argument(
         "--mode",
-        choices=[
-            "off",
-            "led-off",
-            "static",
-            "blinking",
-            "gradual",
-            "wave",
-            "flicker",
-            "scanner",
-            "test",
-            "gui",
-        ],
+        choices=[*AVAILABLE_MODES, "off", "test", "gui"],
         help="Lighting mode (use 'off' to disable daemon, 'gui' to open the interface)",
     )
     parser.add_argument("--opacity", type=int, help="Max opacity (0-100)")
@@ -56,7 +46,6 @@ def main():
     parser.add_argument("--contrast", action="store_true", help="Apply contrast curve to wave")
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--status", action="store_true")
-    parser.add_argument("--config", action="store_true")
     parser.add_argument("--pid", type=int, help="Product ID")
     parser.add_argument("--vid", type=int, help="Vendor ID")
 
@@ -110,11 +99,6 @@ def main():
             DaemonControl.disable()
             return
 
-        if not args.mode:
-            logger.error("You must specify a mode")
-            parser.print_help()
-            sys.exit(1)
-
         if args.save:
             controller.save_and_apply(
                 args.mode,
@@ -126,7 +110,7 @@ def main():
                 variation=args.variation,
                 speed=args.speed,
                 step=args.step,
-                contrast=args.contrast if args.contrast else None,
+                contrast=args.contrast or None,
             )
         else:
             logger.warning("Use --save to apply changes")
