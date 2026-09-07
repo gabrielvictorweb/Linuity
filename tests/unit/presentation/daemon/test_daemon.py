@@ -92,6 +92,67 @@ def test_run_does_not_reset_when_device_not_detected(mocker):
     effect_runner.run.assert_not_called()
 
 
+def test_default_mode_does_not_open_device(mocker):
+    preset = {"mode": "default", "interval": "0.5", "vid": "1008", "pid": "2444"}
+    config_loader = mocker.Mock()
+    config_loader.load.return_value = preset
+    device_manager = mocker.Mock()
+    effect_runner = mocker.Mock()
+    mocker.patch(
+        "linuity.presentation.daemon.daemon.time.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    daemon = _make_daemon(mocker, config_loader, device_manager, effect_runner)
+
+    with pytest.raises(KeyboardInterrupt):
+        daemon.run()
+
+    device_manager.connect.assert_not_called()
+    effect_runner.run.assert_not_called()
+    assert daemon._current_preset == preset
+
+
+def test_switching_to_default_releases_connected_device(mocker):
+    preset = {"mode": "default", "interval": "0.5"}
+    config_loader = mocker.Mock()
+    config_loader.load.return_value = preset
+    device_manager = mocker.Mock()
+    effect_runner = mocker.Mock()
+    daemon = _make_daemon(mocker, config_loader, device_manager, effect_runner)
+
+    calls = {"count": 0}
+
+    def fake_connect(*_args, **_kwargs):
+        calls["count"] += 1
+        return object()
+
+    device_manager.connect.side_effect = fake_connect
+
+    # Seed the run loop's local device through an initial non-default preset.
+    config_loader.load.side_effect = [
+        {"mode": "static", "interval": "0", "vid": "1", "pid": "2"},
+        preset,
+    ]
+    mocker.patch(
+        "linuity.presentation.daemon.daemon.os.path.getmtime",
+        side_effect=[1.0, 2.0],
+    )
+    sleeps = {"count": 0}
+
+    def fake_sleep(_interval):
+        sleeps["count"] += 1
+        if sleeps["count"] == 2:
+            raise KeyboardInterrupt
+
+    mocker.patch("linuity.presentation.daemon.daemon.time.sleep", side_effect=fake_sleep)
+
+    with pytest.raises(KeyboardInterrupt):
+        daemon.run()
+
+    device_manager.reset.assert_called_once()
+    assert effect_runner.reset.call_count >= 2
+
+
 def test_load_preset_if_changed_does_not_resurrect_stale_preset(mocker):
     config_loader = mocker.Mock()
     config_loader.path = "/fake/preset.conf"

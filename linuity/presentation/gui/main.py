@@ -35,9 +35,8 @@ def launch_gui():
         from gi.repository import Gtk  # noqa: F401
     except (ImportError, ValueError):
         logger.error(
-            "PyGObject/GTK4 not found. Install with: "
-            "sudo apt install python3-gi gir1.2-gtk-4.0 "
-            "(or: pip install linuity[gui])"
+            "PyGObject/GTK4 not found. Install python3-gi and gir1.2-gtk-4.0 "
+            "on Debian/Ubuntu, or python-gobject and gtk4 on Arch Linux."
         )
         return 1
 

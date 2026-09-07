@@ -68,6 +68,18 @@ class Daemon:
 
                 vid = preset.get("vid")
                 pid = preset.get("pid")
+                interval = float(preset.get("interval", 0.3))
+
+                if preset.get("mode") == "default":
+                    if device is not None:
+                        self.device_manager.reset()
+                        self.effect_runner.reset()
+                        device = None
+                    if preset != self._current_preset:
+                        logger.info("Built-in device lighting released")
+                        self._current_preset = preset
+                    time.sleep(interval)
+                    continue
 
                 if device is not None and not self.device_manager.is_connected(vid, pid):
                     log_separator(logger)
@@ -92,8 +104,6 @@ class Daemon:
                     logger.info("New preset loaded: %s", preset)
                     self._current_preset = preset
 
-                interval = float(preset.get("interval", 0.3))
-
                 self.effect_runner.run(device, preset)
 
                 time.sleep(interval)
@@ -108,3 +118,7 @@ class Daemon:
                 self._current_preset = None
 
                 time.sleep(2)
+
+        if device is not None:
+            self.device_manager.reset()
+            self.effect_runner.reset()

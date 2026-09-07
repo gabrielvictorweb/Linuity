@@ -5,12 +5,13 @@ from linuity.presentation.cli.cli_controller import CLIController
 
 logger = logging.getLogger(__name__)
 
-MODES = ["led-off", "static", "blinking", "wave", "gradual", "flicker", "scanner"]
+MODES = ["default", "led-off", "static", "blinking", "wave", "gradual", "flicker", "scanner"]
 
 # Parameters shown per mode. The view builds one widget row per parameter
 # and toggles visibility based on the selected mode; apply() uses the same
 # table to drop values that do not belong to the mode.
 MODE_PARAMS = {
+    "default": [],
     "led-off": [],
     "static": ["max"],
     "blinking": ["max", "interval"],

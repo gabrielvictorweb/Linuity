@@ -33,8 +33,44 @@ cd "$(dirname "$0")"
 # =======================================
 
 echo -e "${CYAN}[ + ] Installing dependencies...${RESET}"
-sudo apt update
-sudo apt install -y pipx python3-hid fzf python3-gi gir1.2-gtk-4.0
+
+if command -v apt-get > /dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y \
+        pipx \
+        python3-hid \
+        python3-usb \
+        fzf \
+        python3-gi \
+        gir1.2-gtk-4.0 \
+        libusb-1.0-0 \
+        usbutils \
+        xdg-utils \
+        desktop-file-utils
+elif command -v pacman > /dev/null 2>&1; then
+    if ! sudo pacman -S --needed --noconfirm \
+        python-pipx \
+        python-hidapi \
+        python-pyusb \
+        fzf \
+        python-gobject \
+        gtk4 \
+        libusb \
+        usbutils \
+        xdg-utils \
+        desktop-file-utils; then
+        echo -e "${RED}[ x ] Failed to install Arch dependencies${RESET}"
+        echo "If pacman reported 404 errors, your package database is probably stale."
+        echo "Linuity will not upgrade your system automatically."
+        echo "When you are ready, run 'sudo pacman -Syu', then rerun this installer."
+        exit 1
+    fi
+else
+    echo -e "${RED}[ x ] Unsupported package manager${RESET}"
+    echo "Install pipx, hidapi, PyUSB/libusb, fzf, PyGObject, GTK4, usbutils, xdg-utils,"
+    echo "and desktop-file-utils with your distribution's package manager."
+    exit 1
+fi
 
 pipx ensurepath
 
@@ -45,12 +81,13 @@ pipx ensurepath
 echo -e "${CYAN}[ + ] Installing Linuity...${RESET}"
 
 pipx uninstall linuity 2>/dev/null || true
-# --system-site-packages exposes apt's python3-gi (PyGObject/GTK4) inside
-# the pipx venv, so the GUI works without any extra install step
+# --system-site-packages exposes the distribution's PyGObject/GTK4 bindings
+# inside the pipx venv, so the GUI works without compiling PyGObject from PyPI.
 pipx install . --force --system-site-packages
-pipx runpip linuity install hidapi
 
-DAEMON_PATH="$HOME/.local/bin/linuity-daemon"
+LINUITY_BIN_DIR=$(pipx environment --value PIPX_BIN_DIR 2>/dev/null || true)
+LINUITY_BIN_DIR="${LINUITY_BIN_DIR:-$HOME/.local/bin}"
+DAEMON_PATH="$LINUITY_BIN_DIR/linuity-daemon"
 
 if [ ! -f "$DAEMON_PATH" ]; then
     echo -e "${RED}[ x ] Daemon not found${RESET}"
@@ -157,7 +194,10 @@ sudo usermod -aG "$GROUP_NAME" "$USER"
 
 RULE_FILE="/etc/udev/rules.d/99-linuity.rules"
 
-echo "SUBSYSTEM==\"hidraw\", ATTRS{idVendor}==\"$VID\", ATTRS{idProduct}==\"$PID\", MODE=\"0660\", GROUP=\"$GROUP_NAME\"" | sudo tee "$RULE_FILE" > /dev/null
+sudo tee "$RULE_FILE" > /dev/null <<EOF
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="$VID", ATTRS{idProduct}=="$PID", MODE="0660", GROUP="$GROUP_NAME"
+SUBSYSTEM=="usb", ATTR{idVendor}=="$VID", ATTR{idProduct}=="$PID", MODE="0660", GROUP="$GROUP_NAME"
+EOF
 
 sudo udevadm control --reload-rules
 sudo udevadm trigger
@@ -239,7 +279,7 @@ Type=Application
 Version=1.0
 Name=Linuity
 Comment=HyperX LED Controller
-Exec=$HOME/.local/bin/linuity --mode gui
+Exec=$LINUITY_BIN_DIR/linuity --mode gui
 Icon=linuity
 Terminal=false
 Categories=Settings;HardwareSettings;

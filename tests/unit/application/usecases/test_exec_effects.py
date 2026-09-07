@@ -1,6 +1,7 @@
 from unittest.mock import call
 
 from linuity.application.usecases.exec_blink_effect import ExecBlinkEffect
+from linuity.application.usecases.exec_default_effect import ExecDefaultEffect
 from linuity.application.usecases.exec_flicker_effect import ExecFlickerEffect
 from linuity.application.usecases.exec_gradual_effect import ExecGradualEffect
 from linuity.application.usecases.exec_off_effect import ExecOffEffect
@@ -17,6 +18,16 @@ def test_exec_blink_effect_toggles(mocker):
     effect.execute({"max": 80})
 
     device.set_led_intensity.assert_has_calls([call(80.0, 80.0), call(0, 0)])
+
+
+def test_exec_default_effect_releases_device_once(mocker):
+    device = mocker.Mock()
+    effect = ExecDefaultEffect(device)
+
+    effect.execute({})
+    effect.execute({})
+
+    device.close.assert_called_once()
 
 
 def test_exec_flicker_effect_clamps_max(mocker):

@@ -63,6 +63,35 @@ def test_create_uses_custom_vid_pid(monkeypatch):
     assert raw.open_args == (111, 222)
 
 
+def test_create_uses_usb_control_transport_for_duocast(monkeypatch):
+    factory_module = _load_factory_module(monkeypatch)
+
+    class FakeUsbControlDevice:
+        def __init__(self):
+            self.open_args = None
+
+        def open(self, vid, pid):
+            self.open_args = (vid, pid)
+
+    raw = FakeUsbControlDevice()
+    monkeypatch.setattr(factory_module, "UsbControlDevice", lambda: raw)
+    monkeypatch.setattr(factory_module, "HyperXDuoCast", lambda dev: ("duocast", dev))
+
+    factory = factory_module.HyperXDeviceFactory()
+    result = factory.create(vid="1008", pid="2444")
+
+    assert result == ("duocast", raw)
+    assert raw.open_args == (0x03F0, 0x098C)
+
+
+def test_create_rejects_duocast_audio_endpoint(monkeypatch):
+    factory_module = _load_factory_module(monkeypatch)
+    factory = factory_module.HyperXDeviceFactory()
+
+    with pytest.raises(ValueError, match="DuoCast Controller"):
+        factory.create(vid=0x03F0, pid=0x0A8C)
+
+
 def test_create_raises_on_default_open_error(monkeypatch):
     factory_module = _load_factory_module(monkeypatch)
 

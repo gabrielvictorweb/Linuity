@@ -16,6 +16,7 @@ HyperX LED controller for Linux. Controls LED effects on HyperX devices via low-
 ## Supported Devices
 
 - HyperX QuadCast II (tested)
+- HyperX DuoCast (`03f0:098c` controller; experimental)
 
 Other HyperX devices may work but are not officially supported.
 
@@ -60,9 +61,10 @@ If `linuity` is not found immediately after installation, open a new terminal to
 
 ## Features
 
-- LED modes: `led-off`, `static`, `blinking`, `gradual`, `wave`, `flicker`, `scanner`
+- LED modes: `default`, `led-off`, `static`, `blinking`, `gradual`, `wave`, `flicker`, `scanner`
 - Native GTK4 desktop interface with real-time log viewer
 - Background daemon with automatic recovery on USB reconnect
+- DuoCast display control through its dedicated USB controller
 - Persistent configuration via preset file
 - Update notifications on startup (CLI and GUI)
 - Full CLI for scripting and automation
@@ -73,10 +75,14 @@ If `linuity` is not found immediately after installation, open a new terminal to
 
 - Linux (systemd-based)
 - Python 3.10+
-- `pipx`, `fzf`, `python3-hid`
-- `python3-gi`, `gir1.2-gtk-4.0` (installed automatically by `install.sh`)
+- pipx, fzf, Python HID and USB bindings
+- PyGObject and GTK4
 
-Validated on Ubuntu 26.04 and Debian 13.
+## Validated on
+
+- Ubuntu 26.04
+- Debian 13
+- Arch (CachyOS)
 
 ---
 
@@ -101,6 +107,9 @@ linuity --mode scanner --speed 0.15 --min 5 --max 100 --interval 0.05 --save
 
 # Turn off LED
 linuity --mode led-off --save
+
+# Release software control and restore the device's built-in lighting
+linuity --mode default --save
 
 # Disable daemon
 linuity --mode off
@@ -135,6 +144,20 @@ View daemon logs:
 journalctl -u linuity.service -f
 ```
 
+### Restoring DuoCast factory lighting
+
+`default` closes Linuity's controller connection and stops sending display
+frames. This lets the DuoCast resume its built-in gradient without writing
+firmware or saving a lighting profile:
+
+```bash
+linuity --mode default --save
+```
+
+If the microphone does not resume immediately, unplug and reconnect it after
+selecting `default`. Use `led-off` instead when the ring should remain black;
+that mode intentionally keeps sending an override.
+
 ---
 
 ## About the Installer
@@ -143,9 +166,9 @@ journalctl -u linuity.service -f
 
 ### System changes
 
-- Installs packages: `pipx`, `python3-hid`, `fzf`, `python3-gi`, `gir1.2-gtk-4.0`
+- Installs the required packages with `apt-get` on Debian/Ubuntu or `pacman` on Arch Linux
 - Registers a systemd service: `/etc/systemd/system/linuity.service`
-- Creates udev rules: `/etc/udev/rules.d/99-linuity.rules`
+- Creates HID and USB udev rules: `/etc/udev/rules.d/99-linuity.rules`
 - Adds a scoped sudoers rule: `/etc/sudoers.d/linuity` (NOPASSWD only for `systemctl restart/disable linuity.service`)
 
 ### User changes

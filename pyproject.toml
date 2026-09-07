@@ -10,7 +10,8 @@ authors = [
     { name = "Gabriel Victor" }
 ]
 dependencies = [
-    "hidapi"
+    "hidapi",
+    "pyusb",
 ]
 requires-python = ">=3.8"
 

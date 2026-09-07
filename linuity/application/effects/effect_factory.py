@@ -2,6 +2,7 @@ import logging
 
 from linuity.application.ports.usb_device import UsbDevice
 from linuity.application.usecases.exec_blink_effect import ExecBlinkEffect
+from linuity.application.usecases.exec_default_effect import ExecDefaultEffect
 from linuity.application.usecases.exec_flicker_effect import ExecFlickerEffect
 from linuity.application.usecases.exec_gradual_effect import ExecGradualEffect
 from linuity.application.usecases.exec_off_effect import ExecOffEffect
@@ -12,6 +13,7 @@ from linuity.application.usecases.exec_wave_effect import ExecWaveEffect
 logger = logging.getLogger(__name__)
 
 _REGISTRY = {
+    "default": ExecDefaultEffect,
     "led-off": ExecOffEffect,
     "static": ExecOpacityEffect,
     "blinking": ExecBlinkEffect,

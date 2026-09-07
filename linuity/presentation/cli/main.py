@@ -33,7 +33,10 @@ def main():
     parser.add_argument(
         "--mode",
         choices=[*AVAILABLE_MODES, "off", "test", "gui"],
-        help="Lighting mode (use 'off' to disable daemon, 'gui' to open the interface)",
+        help=(
+            "Lighting mode ('default' releases built-in lighting, "
+            "'off' disables the daemon, 'gui' opens the interface)"
+        ),
     )
     parser.add_argument("--opacity", type=int, help="Max opacity (0-100)")
     parser.add_argument("--min", type=int, help="Minimum opacity (0-100)")
