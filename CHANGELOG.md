@@ -7,6 +7,12 @@ and this project adheres to Semantic Versioning.
 
 ---
 
+## v0.6.0 (2026-09-07)
+
+### Feat
+
+- add DuoCast and Arch Linux support (#4)
+
 ## v0.5.0 (2026-06-15)
 
 ### Feat
