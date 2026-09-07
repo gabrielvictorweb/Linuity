@@ -8,7 +8,7 @@ youtube-url
 ![Lint](https://github.com/gabrielvictorweb/linuity/actions/workflows/lint.yml/badge.svg)
 ![Tests](https://github.com/gabrielvictorweb/linuity/actions/workflows/tests.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/gabrielvictorweb/Linuity/badge.svg?branch=main)](https://coveralls.io/github/gabrielvictorweb/Linuity?branch=main)
-![Python](https://img.shields.io/badge/python-3.10--3.13-blue)
+![Python](https://img.shields.io/badge/python-3.11--3.13-blue)
 ![License](https://img.shields.io/github/license/gabrielvictorweb/linuity)
 
 HyperX LED controller for Linux. Controls LED effects on HyperX devices via low-level HID communication, with a native GTK4 desktop interface and a full CLI for scripting and automation.
@@ -74,7 +74,7 @@ If `linuity` is not found immediately after installation, open a new terminal to
 ## Requirements
 
 - Linux (systemd-based)
-- Python 3.10+
+- Python 3.11+
 - pipx, fzf, Python HID and USB bindings
 - PyGObject and GTK4
 
@@ -108,7 +108,7 @@ linuity --mode scanner --speed 0.15 --min 5 --max 100 --interval 0.05 --save
 # Turn off LED
 linuity --mode led-off --save
 
-# Release software control and restore the device's built-in lighting
+# Release software control (DuoCast restores its built-in gradient)
 linuity --mode default --save
 
 # Disable daemon
@@ -144,19 +144,22 @@ View daemon logs:
 journalctl -u linuity.service -f
 ```
 
-### Restoring DuoCast factory lighting
+### The `default` mode
 
-`default` closes Linuity's controller connection and stops sending display
-frames. This lets the DuoCast resume its built-in gradient without writing
-firmware or saving a lighting profile:
+`default` makes the daemon release the device so it runs its own lighting
+instead of Linuity's effect:
 
 ```bash
 linuity --mode default --save
 ```
 
-If the microphone does not resume immediately, unplug and reconnect it after
-selecting `default`. Use `led-off` instead when the ring should remain black;
-that mode intentionally keeps sending an override.
+- **DuoCast:** closing the controller connection lets it resume its built-in
+  gradient, without writing firmware or saving a lighting profile. If it does
+  not resume immediately, unplug and reconnect the microphone after selecting
+  `default`.
+- **QuadCast II:** the HID connection is released, but the ring keeps whatever
+  it was last showing — the QuadCast has no "restore factory lighting" command.
+  Use `led-off` to force it dark.
 
 ---
 

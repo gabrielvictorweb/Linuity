@@ -25,7 +25,7 @@ Goals:
 
 Make sure you have:
 
-- Python 3.10+
+- Python 3.11+
 - pip
 - pipx (for CLI testing)
 
