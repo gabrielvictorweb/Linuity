@@ -208,6 +208,29 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for setup and workflow.
 
 ---
 
+## Contributors
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/gabrielvictorweb">
+        <img src="https://images.weserv.nl/?url=github.com/gabrielvictorweb.png&w=100&h=100&fit=cover&mask=circle" width="100" height="100" alt="Gabriel Victor" /><br />
+        <sub><b>Gabriel Victor</b></sub>
+      </a><br />
+      <sub>Creator &amp; maintainer</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/UtkarshBS">
+        <img src="https://images.weserv.nl/?url=github.com/UtkarshBS.png&w=100&h=100&fit=cover&mask=circle" width="100" height="100" alt="Utkarsh Kumar" /><br />
+        <sub><b>Utkarsh Kumar</b></sub>
+      </a><br />
+      <sub>HyperX DuoCast &amp; Arch Linux support</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Author
 
 Gabriel Victor — <https://github.com/gabrielvictorweb>
