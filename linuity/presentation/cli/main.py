@@ -34,8 +34,8 @@ def main():
         "--mode",
         choices=[*AVAILABLE_MODES, "off", "test", "gui"],
         help=(
-            "Lighting mode ('default' releases built-in lighting, "
-            "'off' disables the daemon, 'gui' opens the interface)"
+            "Lighting mode ('default' releases software control so the device runs its "
+            "own lighting, 'off' disables the daemon, 'gui' opens the interface)"
         ),
     )
     parser.add_argument("--opacity", type=int, help="Max opacity (0-100)")
