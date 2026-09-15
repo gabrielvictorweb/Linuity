@@ -24,7 +24,7 @@ Other HyperX devices may work but are not officially supported.
 
 ## Interface
 
-<img width="425" height="371" alt="image" src="https://github.com/user-attachments/assets/fd3eb57e-ca34-48ae-a7f6-b1c8e5efee83" />
+<img width="448" height="559" alt="Captura de tela de 2026-09-15 11-41-14" src="https://github.com/user-attachments/assets/127e71ab-823d-4575-831f-cb6b8c4238b8" />
 
 Linuity ships with a native GTK4 interface that lets you switch modes, adjust parameters, and apply changes with a single click. A real-time log viewer is built in, streaming the daemon output directly in the app.
 
@@ -88,7 +88,7 @@ If `linuity` is not found immediately after installation, open a new terminal to
 
 ## CLI Reference
 
-<img width="1000" height="806" alt="image" src="https://github.com/user-attachments/assets/f6145037-4dc0-424e-ac79-047d835f50df" />
+<img width="1126" height="647" alt="Captura de tela de 2026-09-15 11-40-55" src="https://github.com/user-attachments/assets/2267c3d4-1fa4-412b-a352-b60a648823b6" />
 
 Common commands:
 
