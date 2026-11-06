@@ -65,6 +65,22 @@ elif command -v pacman > /dev/null 2>&1; then
         echo "When you are ready, run 'sudo pacman -Syu', then rerun this installer."
         exit 1
     fi
+elif command -v dnf > /dev/null 2>&1; then
+        sudo dnf update
+    if ! sudo dnf install \
+        pipx \
+        python-hidapi \
+        python-pyusb \
+        fzf \
+        python-gobject \
+        gtk4 \
+        libusb \
+        usbutils \
+        xdg-utils \
+        desktop-file-utils; then
+        echo -e "${RED}[ x ] Failed to install Fedora dependencies${RESET}"
+        exit 1
+    fi
 else
     echo -e "${RED}[ x ] Unsupported package manager${RESET}"
     echo "Install pipx, hidapi, PyUSB/libusb, fzf, PyGObject, GTK4, usbutils, xdg-utils,"
